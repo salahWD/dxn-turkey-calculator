@@ -17,4 +17,14 @@ export const globalStyles = StyleSheet.create({
     marginVertical: 8,
     lineHeight: 20
   },
+  cartBtn: {
+    width: 45,
+    backgroundColor: "#3747ba",
+    borderRadius: 6,
+    textAlign: "center",
+    color: "white",
+    paddingVertical: 2,
+    paddingHorizontal: 8,
+    position: 'relative',
+  }
 });

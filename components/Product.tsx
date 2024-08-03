@@ -2,57 +2,47 @@ import { useState } from 'react';
 import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
 import { productPrice } from '../util/productPrice';
 
-import { CustomText } from './CustomText';
-import SelectDropdown from 'react-native-select-dropdown'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import AntDesign from '@expo/vector-icons/AntDesign';
 import Feather from '@expo/vector-icons/Feather';
-
-import CheckBox from 'react-native-checkbox';
 
 export type ProductProps = {
   item: {id: number, title: string, img: String, price: number, points: number},
+  calcFooter: Function,
+  selectedCount?: number,
+  disabled?: boolean,
 };
 
-export function Product({ item }: ProductProps) {
+export function Product({ item, calcFooter, selectedCount=0, disabled=false }: ProductProps) {
 
-  const [count, setCount] = useState(0);
-  const [isChecked, setIsChecked] = useState(false);
+  const [count, setCount] = useState(selectedCount);
+  const [isChecked, setIsChecked] = useState(count > 0);
   
   const handleChangedText = (text) => {
     const val = parseInt(text.replace(/[^0-9]/g, ''));
     setCount(val);
     setIsChecked(val > 0);
+    calcFooter({ item: item, count: val });
   }
 
-  const handleChange = (checked) => {
-    if (!checked) {
+  const handleChange = () => {
+    if (!isChecked) {
       setCount(1);
+      calcFooter({ item: item, count: 1});
     }else {
       setCount(0);
+      calcFooter({ item: item, count: 0 });
     }
-    setIsChecked(!checked)
-  }
-  const handlePlusCount = () => {
-    setCount(count + 1)
-    setIsChecked(true)
-  }
-  const handleMinusCount = () => {
-    if (count >= 1) {
-      setCount(count - 1)
-    }
-    setIsChecked(count - 1 > 0)
+    setIsChecked(!isChecked)
   }
 
   return (
     <View style={styles.product}>
       <View style={{ ...styles.cell, borderLeftWidth: 0 }}>
-          <CheckBox
-            label=""
-            checked={isChecked}
-            onChange={handleChange}
-          />
-        {/* <Pressable onPress={(e) => setIsChecked(!isChecked)}>
-        </Pressable> */}
+        {!disabled && <Pressable onPress={handleChange}>
+          {isChecked && <AntDesign style={styles.checkbox} name="checksquare" size={20} color="black" />}
+          {!isChecked && <Feather style={styles.checkbox} name="square" size={20} color="black" />}
+        </Pressable>}
+        {disabled && <AntDesign style={{ ...styles.checkbox, color: "gray"}} name="checksquare" size={20} color="black" />}
       </View>
       <View style={{ ...styles.cell, flex: 4 }}>
         <Text style={styles.text}>{item.title}</Text>
@@ -65,19 +55,19 @@ export function Product({ item }: ProductProps) {
       </View>
       <View style={{ ...styles.cell, flex: 1.5 }}>
         <View style={ styles.text }>
-          {/* <Pressable onPress={handlePlusCount}>
-            <Text style={styles.actionButton}>+</Text>
-          </Pressable> */}
-          <TextInput 
+          {!disabled && <TextInput 
             style={{ ...styles.dropdownButtonStyle, width: "100%"}}
             inputMode='numeric'
             onChangeText={(text) => handleChangedText(text)}
             value={String(count)}
-            /> 
-          {/* <Pressable onPress={handleMinusCount}>
-            <Text style={styles.actionButton}
-            >-</Text>
-          </Pressable> */}
+          />}
+          {disabled && <TextInput 
+            readOnly={true}
+            style={{ ...styles.dropdownButtonStyle, width: "100%"}}
+            inputMode='numeric'
+            onChangeText={(text) => handleChangedText(text)}
+            value={String(count)}
+          />}
         </View>
       </View>
       <View style={styles.cell}>
@@ -104,13 +94,14 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   dropdownButtonStyle: {
-    height: 35,
+    height: "auto",
     backgroundColor: '#E9ECEF',
     borderColor: '#c0c0c0',
     borderWidth: 1,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingVertical: 0,
     paddingHorizontal: 12,
     width: 50,
   },
@@ -130,13 +121,19 @@ const styles = StyleSheet.create({
   cell: {
     flex: 1,
     alignSelf: 'stretch',
-    textAlignVertical: 'center',
+    justifyContent: 'center',
     fontSize: 13,
     borderLeftWidth: 1,
     borderColor: "#333",
     fontFamily: "zain-bold",
+    height: "auto",
   },
   text: {
     paddingHorizontal: 6,
+  },
+  checkbox: {
+    marginHorizontal: "auto",
+    width: 20,
+    height: 20,
   }
 });

@@ -3,10 +3,14 @@ import { Alert, FlatList, View, StatusBar, Text, StyleSheet, ScrollView } from "
 import { globalStyles, serverUrl } from "../constants/global";
 import { Product } from "../components/Product";
 import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
+import { InfoBar } from "../components/InfoBar";
 
 export default function ProductsScreen() {
   
   const [products, setProducts] = useState([]);
+  const [footerItems, setFooterItems] = useState([]);
+  const [previewMood, setPreviewMood] = useState(true);
 
   useEffect(() => {
     fetch(serverUrl + "/assets/products.json").then(res => {
@@ -19,6 +23,22 @@ export default function ProductsScreen() {
     })
   }, []);
 
+  const togglePreviewMood = () => {
+    setPreviewMood(!previewMood);
+  }
+
+  const calcFooter = (order) => {
+    if (order.count <= 0) {
+      setFooterItems(footerItems.filter(row => {
+        return row.item.id != order.item.id;
+      }));
+    }else {
+      setFooterItems([...footerItems.filter(row => {
+        return row.item.id != order.item.id;
+      }), order]);
+    }
+  }
+
   return (
     <>
       <StatusBar hidden={true} translucent/>
@@ -30,16 +50,31 @@ export default function ProductsScreen() {
           )
         })}
       </ScrollView> */}
-      <FlatList
+      {previewMood && <FlatList
         keyExtractor={(
           item: { id: number, title: string, img: String },
           index: number
         ): string => String(item.id)}
         data={products}
-        renderItem={({ item }) => (
-          <Product item={item} />
+        renderItem={({ item }) => {
+          const selected = footerItems.filter((order) => item.id == order.item.id)[0];
+          return (
+          // count={footerItems.filter(order => item.id == order.item.id)}
+          <Product calcFooter={calcFooter} item={item} selectedCount={selected ? selected.count: 0} />
+        )}}
+      />}
+      {!previewMood && <FlatList
+        keyExtractor={(
+          order: {item: { id: number, title: string, img: String }, count: number},
+          index: number
+        ): string => String(order.item.id)}
+        data={footerItems}
+        renderItem={({ item:order }) => (
+          <Product disabled={true} calcFooter={calcFooter} item={order.item} selectedCount={order.count} />
         )}
-      />
+      />}
+      {previewMood && <Footer togglePreviewMood={togglePreviewMood} info={footerItems} />}
+      {!previewMood && <InfoBar togglePreviewMood={togglePreviewMood} info={footerItems} />}
     </>
   );
 }
