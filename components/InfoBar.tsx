@@ -1,21 +1,28 @@
-import { useEffect, useState } from 'react';
-import { Text, TextInput, View, Button, StyleSheet, Pressable, Alert } from 'react-native';
-import { productPrice } from '../util/productPrice';
-import { globalStyles } from '../constants/global';
-import AntDesign from '@expo/vector-icons/AntDesign';
+import { useEffect, useContext } from 'react';
+import { Text, TextInput, View, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Entypo from '@expo/vector-icons/Entypo';
 
-export function InfoBar({ info, togglePreviewMood }) {
+import { LangContext } from '../App';
 
-  const [formData, setFormData] = useState({
-    phone: null,
-    membership: null,
-    name: null,
-    address: null,
-    recipient: null,
-    city: null,
-  });
+
+const langs = {
+  ar: {
+    total_price: "السعر الكلّي",
+    total_points: "مجموع النقاط",
+    products_count: "عدد المنتجات",
+  },
+  tr: {
+    total_price: "total price",
+    total_points: "total points",
+    products_count: "products count",
+  }
+}
+
+
+export function InfoBar({ info: {price, points, products}, formInfo }) {
+
+  const [language, setLanguage] = useContext(LangContext);
+  const [formData, setFormData] = formInfo;
   
   useEffect(() => {
     const loadInputs = async () => {
@@ -24,8 +31,6 @@ export function InfoBar({ info, togglePreviewMood }) {
         if (form !== null) {
           setFormData({...formData, ...form});
         }
-        console.log("form data: ", formData)
-        console.log("form: ", form)
       } catch (e) {
         console.error('Failed to load inputs:', e);
       }
@@ -34,17 +39,8 @@ export function InfoBar({ info, togglePreviewMood }) {
     loadInputs();
   }, []);
 
-  const saveInputs = async () => {
-    try {
-      await AsyncStorage.setItem('@form', JSON.stringify(formData));
-      Alert.alert('تم إرسال الطلب بنجاح');
-    } catch (e) {
-      console.error('Failed to save inputs:', e);
-    }
-  }
-
   return (
-    <View style={{backgroundColor: 'skyblue'}}>
+    <View style={{backgroundColor: 'skyblue' }}>
       <View style={styles.footer}>
         <View style={styles.container}>
           <View style={styles.inputRow}>
@@ -60,40 +56,18 @@ export function InfoBar({ info, togglePreviewMood }) {
         </View>
         <View style={styles.holder}>
           <Text style={{...styles.row }}>
-            <Text>السعر الكلّي: </Text>
-            <Text style={{ fontFamily: "zain-black" }}>{info.reduce((value, row) => value + productPrice(row.item.price) * row.count, 0)}</Text>
+            <Text>{langs[language].total_price}: </Text>
+            <Text style={{ fontFamily: "zain-black" }}>{ price }</Text>
           </Text>
           <Text style={{...styles.row }}>
-            <Text>مجموع النقاط: </Text>
-            <Text style={{ fontFamily: "zain-black" }}>{info.reduce((value, row) => value + row.item.points, 0)}</Text>
+            <Text>{langs[language].total_points}: </Text>
+            <Text style={{ fontFamily: "zain-black" }}>{ points }</Text>
           </Text>
           <Text style={{...styles.row }}>
-            <Text>عدد المنتجات: </Text>
-            <Text style={{ fontFamily: "zain-black" }}>{info.reduce((value, row) => value + row.count, 0)}</Text>
+            <Text>{langs[language].products_count}: </Text>
+            <Text style={{ fontFamily: "zain-black" }}>{ products }</Text>
           </Text>
         </View>
-      </View>
-      <View style={styles.actionsBar}>
-        <Pressable onPress={e => togglePreviewMood()}>
-          <AntDesign style={globalStyles.cartBtn} name="eyeo" size={24} color="black" />
-        </Pressable>
-        <View style={{ flexDirection: "row", gap: 12 }}>
-          <Pressable onPress={saveInputs}>
-            <View style={styles.orderBtn}>
-              <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
-              <Text style={styles.orderBtnText}>الطلب من تقسيم</Text>
-            </View>
-          </Pressable>
-          <Pressable onPress={saveInputs}>
-            <View style={styles.orderBtn}>
-              <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
-              <Text style={styles.orderBtnText}>الطلب من اسنيورت</Text>
-            </View>
-          </Pressable>
-        </View>
-        <Pressable onPress={e => togglePreviewMood()}>
-          <AntDesign style={{ ...globalStyles.cartBtn, backgroundColor: "#289e16", color: "#dcfadc"}} name="camerao" size={24} color="black" />
-        </Pressable>
       </View>
     </View>
   );
@@ -106,13 +80,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: 4,
     paddingHorizontal: 16,
-  },
-  actionsBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingBottom: 4,
-    paddingHorizontal: 22,
   },
   holder: {
     gap: 4,
@@ -144,17 +111,5 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     paddingHorizontal: 12,
     width: 50,
-  },
-  orderBtn: {
-    backgroundColor: "#3dcc5a",
-    color: "white",
-    borderRadius: 8,
-    flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 8
-  },
-  orderBtnText: {
-    color: "white",
   },
 });

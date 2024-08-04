@@ -8,11 +8,12 @@ import Feather from '@expo/vector-icons/Feather';
 export type ProductProps = {
   item: {id: number, title: string, img: String, price: number, points: number},
   calcFooter: Function,
+  dollarPrice?: number,
   selectedCount?: number,
   disabled?: boolean,
 };
 
-export function Product({ item, calcFooter, selectedCount=0, disabled=false }: ProductProps) {
+export function Product({ item, calcFooter, dollarPrice=0, selectedCount=0, disabled=false }: ProductProps) {
 
   const [count, setCount] = useState(selectedCount);
   const [isChecked, setIsChecked] = useState(count > 0);
@@ -21,16 +22,16 @@ export function Product({ item, calcFooter, selectedCount=0, disabled=false }: P
     const val = parseInt(text.replace(/[^0-9]/g, ''));
     setCount(val);
     setIsChecked(val > 0);
-    calcFooter({ item: item, count: val });
+    calcFooter({ id: item.id, count: val });
   }
 
   const handleChange = () => {
     if (!isChecked) {
       setCount(1);
-      calcFooter({ item: item, count: 1});
+      calcFooter({ id: item.id, count: 1});
     }else {
       setCount(0);
-      calcFooter({ item: item, count: 0 });
+      calcFooter({ id: item.id, count: 0 });
     }
     setIsChecked(!isChecked)
   }
@@ -51,7 +52,7 @@ export function Product({ item, calcFooter, selectedCount=0, disabled=false }: P
         <Text style={styles.text}>{item.points}</Text>
       </View>
       <View style={styles.cell}>
-        <Text style={styles.text}>{productPrice(item.price)}</Text>
+        <Text style={styles.text}>{productPrice(dollarPrice, item.price)}</Text>
       </View>
       <View style={{ ...styles.cell, flex: 1.5 }}>
         <View style={ styles.text }>
@@ -74,7 +75,7 @@ export function Product({ item, calcFooter, selectedCount=0, disabled=false }: P
         <Text style={styles.text}>{item.points * count}</Text>
       </View>
       <View style={styles.cell}>
-        <Text style={styles.text}>{productPrice(item.price) * count}</Text>
+        <Text style={styles.text}>{productPrice(dollarPrice, item.price) * count}</Text>
       </View>
     </View>
   );
