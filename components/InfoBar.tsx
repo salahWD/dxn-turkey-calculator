@@ -40,16 +40,18 @@ export function InfoBar({ info: {price, points, products}, formInfo }) {
   }, []);
 
   return (
-    <View style={{backgroundColor: 'skyblue' }}>
+    <View style={styles.main}>
       <View style={styles.footer}>
         <View style={styles.container}>
           <View style={styles.inputRow}>
             <TextInput onChangeText={(e) => {setFormData({...formData, name: e})}} value={formData.name} style={styles.textInput} placeholder='اسم العضو' />
             <TextInput onChangeText={(e) => {setFormData({...formData, membership: e})}} value={formData.membership} inputMode='numeric' style={styles.textInput} placeholder='رقم العضوية' />
-            <TextInput onChangeText={(e) => {setFormData({...formData, phone: e})}} value={formData.phone} inputMode='numeric' style={styles.textInput} placeholder='رقم الهاتف' />
           </View>
           <View style={styles.inputRow}>
+            <TextInput onChangeText={(e) => {setFormData({...formData, phone: e})}} value={formData.phone} inputMode='numeric' style={styles.textInput} placeholder='رقم الهاتف' />
             <TextInput onChangeText={(e) => {setFormData({...formData, city: e})}} value={formData.city} style={styles.textInput} placeholder='المدينة' />
+          </View>
+          <View style={styles.inputRow}>
             <TextInput onChangeText={(e) => {setFormData({...formData, recipient: e})}} value={formData.recipient} style={styles.textInput} placeholder='إسم المستلم' />
             <TextInput onChangeText={(e) => {setFormData({...formData, address: e})}} value={formData.address} style={styles.textInput} placeholder='العنوان' />
           </View>
@@ -74,6 +76,9 @@ export function InfoBar({ info: {price, points, products}, formInfo }) {
 }
 
 const styles = StyleSheet.create({
+  main: {
+    backgroundColor: '#afebf0',
+  },
   footer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -98,7 +103,8 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 5,
+    gap: 5,
+    marginBottom: 2,
   },
   textInput: {
     flex: 1,

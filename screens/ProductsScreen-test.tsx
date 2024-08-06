@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef, MutableRefObject } from "react";
-import { ScrollView, FlatList, StatusBar, StyleSheet, View, Animated, Text, Linking, Pressable } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { ScrollView, FlatList, StatusBar, StyleSheet, View, Share, Text, Linking, Pressable } from "react-native";
 import { serverUrl, globalStyles } from "../constants/global";
 import { productPrice, getDollarPrice } from '../util/productPrice';
 import { Product } from "../components/Product";
@@ -13,13 +13,13 @@ import Entypo from '@expo/vector-icons/Entypo';
 import * as MediaLibrary from "expo-media-library";
 
 import ViewShot, { captureRef } from 'react-native-view-shot';
-import * as Sharing from 'expo-sharing';
+// import ScreenshotView from 'react-native-screenshot-view';
+
 
 export default function ProductsScreen() {
 
-  const imageRef: null | MutableRefObject<any> = useRef(null);
+  const imageRef = useRef();
 
-  const [scale] = useState(new Animated.Value(1));
   const [dollarPrice, setDollarPrice] = useState(null);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -69,7 +69,7 @@ export default function ProductsScreen() {
     // من 1200-1600 اجور 50 ليرة
     // من 800-1200 اجور 75 ليرة
     // من 50-800    اجور 110 ليرة
-
+    
     let msg = '';
     selectedProducts.forEach(product => {
       msg += `%0a المنتج: *${product.title}*`;
@@ -121,9 +121,9 @@ export default function ProductsScreen() {
     let url = "";
     const msg = createOrderMessage();
     if (branch == 1) {// taksim branch
-      url = "https://wa.me/905528666050?text=" + msg;
+      url = "https://wa.me/+905528666050?text=" + msg;
     }else {// essenyurt branch
-      url = "https://wa.me/905444482988?text=" + msg;
+      url = "https://wa.me/+905444482988?text=" + msg;
     }
     await Linking.openURL(url);
   }
@@ -131,50 +131,35 @@ export default function ProductsScreen() {
   const onSaveImageAsync = async () => {
     console.log("start function")
     try {
-      // Scale down
-      Animated.timing(scale, {
-        toValue: 0.5,
-        duration: 500,
-        useNativeDriver: true,
-      }).start(async () => {
-        // Capture the scaled view
-        const imageUri = await captureRef(imageRef, {
-          format: "png",
-          quality: 0.9,
-          snapshotContentContainer: true,
-        });
-        
-        console.log("success")
-        await Sharing.shareAsync(imageUri, { mimeType: 'image/gif' });
-
-        // Scale back to original
-        Animated.timing(scale, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }).start();
-      })
+      console.log("enter try")
+      console.log(imageRef)
+      captureRef(imageRef, {
+        snapshotContentContainer: true,
+        quality: 1,
+        format: 'png',
+      }).then(uri => {
+        console.log("enter then")
+        console.log(uri)
+        // MediaLibrary.saveToLibraryAsync(uri).then((uri: any) => {
+        //   console.log(uri)
+        //   Share.share({
+        //     message: 'مرحبا, اريد هذه المنتجات, شكراً!',
+        //     url: uri,
+        //   }).then(e => {
+        //     console.log(e)
+        //   }).catch(e => console.error(e));
+        // }).catch(e => console.error(e));
+      }).catch(e => console.error("error image referance: ", e));
     } catch (e) {
       console.error("Error in onsaveimageasync function: ", e);
     }
-    // try {
-    //   console.log("enter try")
-      
-    //   const imageUri = await imageRef.current.capture();
-    //   console.log("success")
-      
-    //   await Sharing.shareAsync(imageUri, { mimeType: 'image/gif' });
-
-    // } catch (e) {
-    //   console.error("Error in onsaveimageasync function: ", e);
-    // }
   };
 
   return (
     <>
       <StatusBar hidden={true} translucent/>
       {/* <View ref={imageRef} collapsable={false} style={{ flex: 1 }}> */}
-      <ViewShot ref={imageRef} style={{ flex: 1 }} options={{ format: "png", quality: 0.9, snapshotContentContainer: false, }}>
+      <ViewShot ref={imageRef} style={{ flex: 1 }} options={{ format: "jpg", quality: 0.9, snapshotContentContainer: true, }}>
         <Header />
         {previewMood && 
           <>
@@ -197,44 +182,40 @@ export default function ProductsScreen() {
         }
         {!previewMood && 
           <>
-            <FlatList
-              keyExtractor={(
-                item: { id: number, title: string, img: String }
-              ): string => String(item.id)}
-              data={selectedProducts}
-              renderItem={({ item }) => {
+            <ScrollView contentContainerStyle={{ paddingBottom: 150 }}>
+              {selectedProducts.map((item) => {
                 let count = 0;
-                if (Object.hasOwn(footerItems, item.id)) {
+                if (footerItems.hasOwnProperty(item.id)) {
                   count = footerItems[item.id];
                 }
                 return (
-                  <Product disabled={true} dollarPrice={dollarPrice} calcFooter={calcFooter} item={item} selectedCount={count} />
+                  <Product key={item.id} disabled={true} dollarPrice={dollarPrice} calcFooter={calcFooter} item={item} selectedCount={count} />
                 )
-              }}
-            />
-            <InfoBar info={footerInfo} formInfo={[formData, setFormData]} />
-            <View style={styles.actionsBox}>
-              <Pressable onPress={togglePreviewMood}>
-                <AntDesign style={globalStyles.cartBtn} name="eyeo" size={24} color="black" />
-              </Pressable>
-              <View style={{ flexDirection: "row", gap: 12 }}>
-                <Pressable onPress={() => {makeOrder(1)}}>
-                  <View style={styles.orderBtn}>
-                    <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
-                    <Text style={styles.orderBtnText}>تقسيم</Text>
-                  </View>
+              })}
+              <InfoBar info={footerInfo} formInfo={[formData, setFormData]} />
+              <View style={styles.actionsBox}>
+                <Pressable onPress={togglePreviewMood}>
+                  <AntDesign style={globalStyles.cartBtn} name="eyeo" size={24} color="black" />
                 </Pressable>
-                <Pressable onPress={() => {makeOrder(2)}}>
-                  <View style={styles.orderBtn}>
-                    <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
-                    <Text style={styles.orderBtnText}>اسنيورت</Text>
-                  </View>
+                <View style={{ flexDirection: "row", gap: 12 }}>
+                  <Pressable onPress={() => {makeOrder(1)}}>
+                    <View style={styles.orderBtn}>
+                      <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
+                      <Text style={styles.orderBtnText}>الطلب من تقسيم</Text>
+                    </View>
+                  </Pressable>
+                  <Pressable onPress={() => {makeOrder(2)}}>
+                    <View style={styles.orderBtn}>
+                      <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
+                      <Text style={styles.orderBtnText}>الطلب من اسنيورت</Text>
+                    </View>
+                  </Pressable>
+                </View>
+                <Pressable onPress={onSaveImageAsync}>
+                  <AntDesign style={{ ...globalStyles.cartBtn, backgroundColor: "#289e16", color: "#dcfadc"}} name="camerao" size={24} color="black" />
                 </Pressable>
               </View>
-              <Pressable onPress={onSaveImageAsync}>
-                <AntDesign style={{ ...globalStyles.cartBtn, backgroundColor: "#289e16", color: "#dcfadc"}} name="camerao" size={24} color="black" />
-              </Pressable>
-            </View>
+            </ScrollView>
           </>
         }
       </ViewShot>
@@ -247,7 +228,7 @@ const styles = StyleSheet.create({
   actionsBox: {
     flexDirection: "row",
     justifyContent: "space-between",
-    backgroundColor: '#afebf0',
+    backgroundColor: "skyblue",
     alignItems: "center",
     paddingBottom: 4,
     paddingHorizontal: 22,

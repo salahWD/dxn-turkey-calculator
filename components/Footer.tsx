@@ -5,6 +5,19 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { globalStyles } from '../constants/global';
 import { LangContext } from '../App';
 
+const langs = {
+  ar: {
+    total_price: "السعرالكلّي",
+    total_points: "مجموع النقاط",
+    products_count: "عدد المنتجات",
+  },
+  tr: {
+    total_price: "total price",
+    total_points: "total points",
+    products_count: "products count",
+  }
+}
+
 export function Footer({ info: {price, points, products}, togglePreviewMood }) {
 
   const [language, setLanguage] = useContext(LangContext);
@@ -18,6 +31,7 @@ export function Footer({ info: {price, points, products}, togglePreviewMood }) {
   return (
     <>
       <Modal
+        statusBarTranslucent
         animationType="slide"
         transparent={true}
         visible={modalVisible}
@@ -44,18 +58,18 @@ export function Footer({ info: {price, points, products}, togglePreviewMood }) {
           <AntDesign style={{ ...globalStyles.cartBtn }} name="eyeo" size={24} color="black" />
         </Pressable>
         <View style={styles.holder}>
-          <Text style={{...styles.row }}>
-            <Text>السعر الكلّي: </Text>
-            <Text style={{ color: "black", fontFamily: "zain-black" }}>{ price }</Text>
-          </Text>
-          <Text style={{...styles.row }}>
-            <Text>مجموع النقاط: </Text>
-            <Text style={{ color: "black", fontFamily: "zain-black" }}>{ points }</Text>
-          </Text>
-          <Text style={{...styles.row }}>
-            <Text>عدد المنتجات: </Text>
-            <Text style={{ color: "black", fontFamily: "zain-black" }}>{ products }</Text>
-          </Text>
+          <View style={{...styles.row }}>
+            <Text style={ styles.value }>{ price }</Text>
+            <Text style={ styles.key }>{langs[language].total_price}: </Text>
+          </View>
+          <View style={{...styles.row }}>
+            <Text style={ styles.value }>{ points }</Text>
+            <Text style={ styles.key }>{langs[language].total_points}: </Text>
+          </View>
+          <View style={{...styles.row }}>
+            <Text style={ styles.value }>{ products }</Text>
+            <Text style={ styles.key }>{langs[language].products_count}: </Text>
+          </View>
         </View>
         <Pressable onPress={() => setModalVisible(true)}>
           <Ionicons style={{ ...globalStyles.cartBtn }} name="language" size={24} color="black" />
@@ -68,36 +82,48 @@ export function Footer({ info: {price, points, products}, togglePreviewMood }) {
 const styles = StyleSheet.create({
   footer: {
     paddingVertical: 6,
+    paddingTop: 8,
     paddingHorizontal: 20,
     flexDirection: "row",
-    gap: 10,
+    gap: 40,
     width: "100%",
-    backgroundColor: 'skyblue',
-    justifyContent: "space-evenly",
+    backgroundColor: '#afebf0',
+    justifyContent: "space-between",
     alignItems: "center",
   },
   holder: {
-    flexDirection: "row",
-    flex: 1,
-    gap: 8,
+    flexDirection: "column",
+    flexGrow: 1,
+    maxWidth: 135
   },
   row: {
-    height: "100%",
-    color: "#444",
-    flex: 1,
-    fontSize: 20,
     display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  key: {
+    color: "#444",
+    textAlign: "right",
+    fontSize: 16,
     fontFamily: "zain-bold",
-    textAlign: "center",
     textAlignVertical: "center",
   },
-
+  value: {
+    fontSize: 18,
+    textAlignVertical: "center",
+    color: "#198691",
+    fontFamily: "zain-black",
+    textAlign: "left",
+  },
   centeredView: {
     flex: 1,
+    flexDirection: "column",
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: "#0000003f",
   },
   modalView: {
+    width: "80%",
     gap: 15,
     backgroundColor: 'white',
     borderRadius: 20,
