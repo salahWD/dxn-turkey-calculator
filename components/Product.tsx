@@ -1,6 +1,8 @@
-import { useState } from 'react';
-import { View, Text, Pressable, TextInput, StyleSheet } from 'react-native';
+import { useState, useContext } from 'react';
+import { View, Text,StyleSheet } from 'react-native';
 import { productPrice } from '../util/productPrice';
+
+import { LangContext } from "../langContext";
 
 import SelectDropdown from 'react-native-select-dropdown'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -13,29 +15,30 @@ export type ProductProps = {
   calcFooter: Function,
   dollarPrice?: number,
   selectedCount?: number,
+  customStyle?: {},
   disabled?: boolean,
 };
 
-export function Product({ item, calcFooter, dollarPrice=0, selectedCount=0, disabled=false }: ProductProps) {
+export function Product({ item, calcFooter, customStyle, dollarPrice=0, selectedCount=0, disabled=false }: ProductProps) {
 
   const [count, setCount] = useState(selectedCount);
+  const [language] = useContext(LangContext);
   
   const handleChangedText = (value) => {
-    console.log(value)
     setCount(value);
     calcFooter({ id: item.id, count: value });
   }
 
   return (
-    <View style={styles.product}>
-      <View style={{ ...styles.cell, borderLeftWidth: 0, flex: 3.5 }}>
-        <Text style={styles.text}>{item.title}</Text>
+    <View style={{ ...styles.product, ...customStyle, backgroundColor: count > 0 ? "#98f2a4": "#e1e4eb", borderWidth: count > 0 ? 0 : .5 }}>
+      <View style={{ ...styles.cell, borderLeftWidth: 0, flex: 3 }}>
+        <Text style={styles.text}>{item.title[language]}</Text>
       </View>
       <View style={{ ...styles.cell, flex: 1 }}>
         <Text style={styles.text}>{item.points}</Text>
       </View>
       <View style={styles.cell}>
-        <Text style={styles.text}>{productPrice(dollarPrice, item.price)}</Text>
+        <Text style={styles.text}>{productPrice(dollarPrice, item.price).toFixed(1)}</Text>
       </View>
       <View style={ styles.cell }>
         <SelectDropdown
@@ -43,7 +46,6 @@ export function Product({ item, calcFooter, dollarPrice=0, selectedCount=0, disa
           disabled={disabled}
           data={productCountList}
           onSelect={(selectedItem, index) => {
-            // console.log(selectedItem, index);
             handleChangedText(selectedItem)
           }}
           renderButton={(selectedItem, isOpened) => {
@@ -80,7 +82,6 @@ export function Product({ item, calcFooter, dollarPrice=0, selectedCount=0, disa
 const styles = StyleSheet.create({
   product: {
     justifyContent: "space-between",
-    backgroundColor: "#e1e4eb",
     borderStyle: 'solid',
     flexDirection: "row",
     borderColor: '#cfcfcf',
@@ -117,11 +118,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
 
-
   dropdownButtonStyle: {
     width: "100%",
     height: 22,
-    // flex: 1,
     backgroundColor: '#F5F5F5',
     borderRadius: 4,
     flexDirection: 'row',

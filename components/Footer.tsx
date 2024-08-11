@@ -3,22 +3,24 @@ import { Text, View, StyleSheet, Pressable, Modal } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { globalStyles } from '../constants/global';
-import { LangContext } from '../App';
+import { LangContext } from '../langContext';
 
 const langs = {
   ar: {
     total_price: "السعرالكلّي",
     total_points: "مجموع النقاط",
+    shipping: "سعر الشحن",
     products_count: "عدد المنتجات",
   },
   tr: {
     total_price: "total price",
+    shipping: "shipping",
     total_points: "total points",
     products_count: "products count",
   }
 }
 
-export function Footer({ info: {price, points, products}, togglePreviewMood }) {
+export function Footer({ info: {price, shippingPrice, points, products}, togglePreviewMood }) {
 
   const [language, setLanguage] = useContext(LangContext);
   const [modalVisible, setModalVisible] = useState(false);
@@ -48,7 +50,7 @@ export function Footer({ info: {price, points, products}, togglePreviewMood }) {
             <Pressable
               style={[styles.button, language == "tr" ? styles.buttonActive: {}]}
               onPress={() => handleLangModal("tr")}>
-              <Text style={[styles.textStyle, language != "tr" ? styles.textStyleActive: {}]}>Turkish</Text>
+              <Text style={[styles.textStyle, language != "tr" ? styles.textStyleActive: {}]}>English</Text>
             </Pressable>
           </View>
         </View>
@@ -57,18 +59,26 @@ export function Footer({ info: {price, points, products}, togglePreviewMood }) {
         <Pressable onPress={e => togglePreviewMood()}>
           <AntDesign style={{ ...globalStyles.cartBtn }} name="eyeo" size={24} color="black" />
         </Pressable>
-        <View style={styles.holder}>
-          <View style={{...styles.row }}>
-            <Text style={ styles.value }>{ price }</Text>
-            <Text style={ styles.key }>{langs[language].total_price}: </Text>
+        <View style={{ flexDirection: "row", flexGrow: 1, justifyContent: "space-evenly"}}>
+          <View style={styles.holder}>
+            <View style={{...styles.row }}>
+              <Text style={ styles.key }>{langs[language].total_price}: </Text>
+              <Text style={ styles.value }>{ price }</Text>
+            </View>
+            <View style={{...styles.row }}>
+              <Text style={ styles.key }>{langs[language].shipping}: </Text>
+              <Text style={ styles.value }>{ shippingPrice }</Text>
+            </View>
           </View>
-          <View style={{...styles.row }}>
-            <Text style={ styles.value }>{ points }</Text>
-            <Text style={ styles.key }>{langs[language].total_points}: </Text>
-          </View>
-          <View style={{...styles.row }}>
-            <Text style={ styles.value }>{ products }</Text>
-            <Text style={ styles.key }>{langs[language].products_count}: </Text>
+          <View style={ styles.holder }>
+            <View style={{...styles.row }}>
+              <Text style={ styles.key }>{langs[language].total_points}: </Text>
+              <Text style={ styles.value }>{ points }</Text>
+            </View>
+            <View style={{...styles.row }}>
+              <Text style={ styles.key }>{langs[language].products_count}: </Text>
+              <Text style={ styles.value }>{ products }</Text>
+            </View>
           </View>
         </View>
         <Pressable onPress={() => setModalVisible(true)}>
@@ -85,31 +95,27 @@ const styles = StyleSheet.create({
     paddingTop: 8,
     paddingHorizontal: 20,
     flexDirection: "row",
-    gap: 40,
-    width: "100%",
+    gap: 10,
+    maxWidth: "100%",
     backgroundColor: '#afebf0',
     justifyContent: "space-between",
     alignItems: "center",
   },
   holder: {
     flexDirection: "column",
-    flexGrow: 1,
-    maxWidth: 135
   },
   row: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "space-between",
+    alignItems: "center",
   },
   key: {
     color: "#444",
     textAlign: "right",
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "zain-bold",
     textAlignVertical: "center",
   },
   value: {
-    fontSize: 18,
+    fontSize: 16,
     textAlignVertical: "center",
     color: "#198691",
     fontFamily: "zain-black",

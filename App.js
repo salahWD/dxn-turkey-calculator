@@ -1,16 +1,14 @@
-import React, { useState, useContext, createContext } from "react";
+import React, { useState } from "react";
 import { View } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import "react-native-reanimated";
 import ProductsScreen from "./screens/ProductsScreen";
 import * as MediaLibrary from "expo-media-library";
+import { LangContext } from "./langContext.ts";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
-
-export const LangContext = createContext(null);
 
 export default function App() {
   const [lang, setLang] = useState("ar");

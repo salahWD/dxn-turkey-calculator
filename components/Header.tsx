@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet } from 'react-native';
 import { useContext } from 'react';
 
-import { LangContext } from '../App';
+import { LangContext } from '../langContext';
 
 export type HeaderProps = {
   title: string,
@@ -14,7 +14,7 @@ const langs = {
     points: "النقاط",
     price: "السعر",
     count: "العدد",
-    total_price: "إجمالي السعر",
+    total_price: "النقاط السعر",
   },
   tr: {
     selected: "selected",
@@ -26,13 +26,14 @@ const langs = {
   }
 }
 
-export function Header() {
+export function Header({ dollarPrice }) {
 
   const [language, setLanguage] = useContext(LangContext);
 
   return (
     <View style={styles.header}>
-      <Text style={{...styles.row, borderLeftWidth: 0, flex: 3.5, }}>{langs[language].products}</Text>
+      <Text style={{ position: "absolute", left: 10, top: 10, opacity: .8, color: "white", fontSize: 16,  }}>{ dollarPrice }TL</Text>
+      <Text style={{...styles.row, borderLeftWidth: 0, flex: 3, }}>{langs[language].products}</Text>
       <Text style={{...styles.row, }}>{langs[language].points}</Text>
       <Text style={{...styles.row, }}>{langs[language].price}</Text>
       <Text style={{...styles.row, }}>{langs[language].count}</Text>
@@ -60,6 +61,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     borderLeftWidth: 1,
     borderColor: "#333",
-    fontFamily: "zain-bold"
+    fontFamily: "zain-bold",
+    textAlign: "right",
   },  
 });

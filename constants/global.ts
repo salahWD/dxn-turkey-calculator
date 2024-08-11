@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
-export const serverUrl = 'http://192.168.1.34:8081';
+export const serverUrl = 'http://192.168.1.33:8081';
 
 export const globalStyles = StyleSheet.create({
   container: {
@@ -23,7 +23,7 @@ export const globalStyles = StyleSheet.create({
     borderRadius: 6,
     textAlign: "center",
     color: "white",
-    paddingVertical: 2,
-    paddingHorizontal: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
   }
 });

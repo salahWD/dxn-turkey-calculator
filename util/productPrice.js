@@ -24,7 +24,7 @@ export const getDollarPrice = async () => {
     if (docSnap.exists()) {
       let data = docSnap.data();
       dollarPrice = parseFloat(data["USD-TL"]);
-      console.log("price of dollar [USD-TL] = ", dollarPrice);
+      // console.log("price of dollar [USD-TL] = ", dollarPrice);
     } else {
       console.error("No such document!");
     }

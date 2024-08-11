@@ -1,5 +1,9 @@
-import React, { useEffect, useState, useRef, MutableRefObject } from "react";
-import { ScrollView, FlatList, StatusBar, StyleSheet, View, Animated, Text, Linking, Pressable } from "react-native";
+import React, { useEffect, useContext, useState, useRef, MutableRefObject } from "react";
+import { Alert, ScrollView, FlatList, StatusBar, StyleSheet, View, Text, Pressable } from "react-native";
+
+// import Share from 'react-native-share';
+import * as MediaLibrary from "expo-media-library";
+
 import { serverUrl, globalStyles } from "../constants/global";
 import { productPrice, getDollarPrice } from '../util/productPrice';
 import { Product } from "../components/Product";
@@ -7,24 +11,45 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { InfoBar } from "../components/InfoBar";
 
+import { LangContext } from "../langContext";
+
 import AntDesign from '@expo/vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Entypo from '@expo/vector-icons/Entypo';
-import * as MediaLibrary from "expo-media-library";
 
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
+import { collectionGroup } from "firebase/firestore";
 
 export default function ProductsScreen() {
 
+  const langs = {
+    ar: {
+      free: "مجاناً",
+      essenyurt: "اسنيورت",
+      taksim: "تقسيم",
+      no_selected_product_title: "لا يوجد منتجات !",
+      no_selected_product_desc: "لم يتم اختيار أي منتجات, يرجى اختيار بعض المنتجات قبل الإنتقال لصفحة المعلومات.",
+      no_selected_product_btn: "حسناً",
+    },
+    tr: {
+      free: "free",
+      essenyurt: "Essenyurt",
+      taksim: "Taksim",
+      no_selected_product_title: "No products!",
+      no_selected_product_desc: "No products selected, please select some products before moving to the information page.",
+      no_selected_product_btn: "Ok",
+    }
+  }
+
   const imageRef: null | MutableRefObject<any> = useRef(null);
 
-  const [scale] = useState(new Animated.Value(1));
+  const [language, setLanguage] = useContext(LangContext);
   const [dollarPrice, setDollarPrice] = useState(null);
   const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [footerItems, setFooterItems] = useState({});
-  const [footerInfo, setFooterInfo] = useState({price: 0, points: 0, products: 0});
+  const [footerInfo, setFooterInfo] = useState({price: 0, points: 0, shippingPrice: 110, products: 0});
   const [previewMood, setPreviewMood] = useState(true);
   const [formData, setFormData] = useState({
     phone: null,
@@ -42,7 +67,7 @@ export default function ProductsScreen() {
     }).then(res => {
       setProducts(res);
     }).catch(err => {
-      console.error(err)
+      console.error("eeeee", err)
       throw new Error("Erro Fetching Products => ", err);
     })
 
@@ -56,19 +81,22 @@ export default function ProductsScreen() {
   }, []);
 
   const togglePreviewMood = () => {
-    setSelectedProducts(products.filter(product => Object.keys(footerItems).includes(String(product.id))));
-    setPreviewMood(!previewMood);
+    if (previewMood) {// main page
+      const selectedProds = products.filter(product => Object.keys(footerItems).includes(String(product.id)));
+      if (selectedProds.length > 0) {
+        setSelectedProducts(selectedProds);
+        setPreviewMood(false);
+      }else {
+        Alert.alert(langs[language].no_selected_product_title, langs[language].no_selected_product_desc, [{
+          text: langs[language].no_selected_product_btn,
+        }]);
+      }
+    }else {// cart page
+      setPreviewMood(true);
+    }
   }
 
   const createOrderMessage = () => {
-
-    // أجور توصيل خدمة الدفع المسبق 
-    // فاتورة بقيمة من 2400 واعلى مجاناً
-    // من 2000-2400 اجور 15ليرة
-    // من 1600-2000 اجور 30 ليرة
-    // من 1200-1600 اجور 50 ليرة
-    // من 800-1200 اجور 75 ليرة
-    // من 50-800    اجور 110 ليرة
 
     let msg = '';
     selectedProducts.forEach(product => {
@@ -101,12 +129,12 @@ export default function ProductsScreen() {
     })
 
     setFooterInfo({
-      price: price,
+      price: parseFloat(price.toFixed(2)),
       points: points,
+      shippingPrice: price >= 2400 ? langs[language].free : (price >= 2000 ? 15: (price >= 1600 ? 30: (price >= 1200 ? 50: (price >= 800 ? 75: 110)))),
       products: totalProducts,
     });
   }
-
 
   const saveInputs = async () => {
     try {
@@ -117,127 +145,113 @@ export default function ProductsScreen() {
   }
 
   const makeOrder = async (branch: number) => {
-    await saveInputs();
-    let url = "";
-    const msg = createOrderMessage();
+    const uri = await onSaveImageAsync(true);
+    await MediaLibrary.saveToLibraryAsync(uri);
+    let url = '';
+
     if (branch == 1) {// taksim branch
-      url = "https://wa.me/905528666050?text=" + msg;
+      // url = "whatsapp://send?phone=905528666050?text=" + msg;
+      url = "whatsapp://send?phone=905528666050&text=Check%20out%20this%20screenshot!";
     }else {// essenyurt branch
-      url = "https://wa.me/905444482988?text=" + msg;
+      // url = "whatsapp://send?phone=905444482988?text=" + msg;
+      url = "whatsapp://send?phone=905528666050&text=Check%20out%20this%20screenshot!";
     }
-    await Linking.openURL(url);
+    Share.open({
+      title: 'Share Screenshot',
+      url: uri,
+      message: 'Check out this screenshot!',
+      // social: Share.Social.WHATSAPP,
+    })
+    .then(e => console.log(e))
+    .catch(e => console.error(e));
   }
 
-  const onSaveImageAsync = async () => {
-    console.log("start function")
+  const onSaveImageAsync = async (willReturn=false) => {
+    await saveInputs();
     try {
-      // Scale down
-      Animated.timing(scale, {
-        toValue: 0.5,
-        duration: 500,
-        useNativeDriver: true,
-      }).start(async () => {
-        // Capture the scaled view
-        const imageUri = await captureRef(imageRef, {
-          format: "png",
-          quality: 0.9,
-          snapshotContentContainer: true,
-        });
-        
-        console.log("success")
-        await Sharing.shareAsync(imageUri, { mimeType: 'image/gif' });
 
-        // Scale back to original
-        Animated.timing(scale, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }).start();
-      })
+      // const imageUri = await imageRef.current.capture();
+      const imageUri = await captureRef(imageRef, {
+        format: "png",
+        quality: 0.9,
+        // snapshotContentContainer: true,
+      });
+      if (willReturn) {
+        return imageUri;
+      }
+      await Sharing.shareAsync(imageUri, { mimeType: 'image/png', dialogTitle: "loog at this" });
+
     } catch (e) {
       console.error("Error in onsaveimageasync function: ", e);
     }
-    // try {
-    //   console.log("enter try")
-      
-    //   const imageUri = await imageRef.current.capture();
-    //   console.log("success")
-      
-    //   await Sharing.shareAsync(imageUri, { mimeType: 'image/gif' });
-
-    // } catch (e) {
-    //   console.error("Error in onsaveimageasync function: ", e);
-    // }
   };
+
 
   return (
     <>
       <StatusBar hidden={true} translucent/>
-      {/* <View ref={imageRef} collapsable={false} style={{ flex: 1 }}> */}
-      <ViewShot ref={imageRef} style={{ flex: 1 }} options={{ format: "png", quality: 0.9, snapshotContentContainer: false, }}>
-        <Header />
-        {previewMood && 
-          <>
-            <FlatList
-              keyExtractor={(
-                item: { id: number, title: string, img: String }
-              ): string => String(item.id)}
-              data={products}
-              renderItem={({ item }) => {
+      {previewMood && 
+        <>
+        <Header dollarPrice={dollarPrice} />
+          <FlatList
+            keyExtractor={(
+              item: { id: number, title: string, img: String }
+            ): string => String(item.id)}
+            data={products}
+            renderItem={({ item }) => {
+              let count = 0;
+              if (Object.hasOwn(footerItems, item.id)) {
+                count = footerItems[item.id];
+              }
+              return (
+              <Product calcFooter={calcFooter} dollarPrice={dollarPrice} item={item} selectedCount={count} />
+            )}}
+          />
+          <Footer togglePreviewMood={togglePreviewMood} info={footerInfo} />
+        </>
+      }
+      {!previewMood && 
+        <ScrollView style={{ flex: 1, backgroundColor: "#defafc"}} contentContainerStyle={{ minHeight: "100%"}}>
+          <ViewShot ref={imageRef} style={{ flex: 1, backgroundColor: "#defafc" }} options={{ format: "png", quality: 1 }}>
+            <Header key="header" dollarPrice={dollarPrice} />
+            <View style={{ flex: 1 }}>
+              {selectedProducts.map(item => {
                 let count = 0;
                 if (Object.hasOwn(footerItems, item.id)) {
                   count = footerItems[item.id];
                 }
                 return (
-                <Product calcFooter={calcFooter} dollarPrice={dollarPrice} item={item} selectedCount={count} />
-              )}}
-            />
-            <Footer togglePreviewMood={togglePreviewMood} info={footerInfo} />
-          </>
-        }
-        {!previewMood && 
-          <>
-            <FlatList
-              keyExtractor={(
-                item: { id: number, title: string, img: String }
-              ): string => String(item.id)}
-              data={selectedProducts}
-              renderItem={({ item }) => {
-                let count = 0;
-                if (Object.hasOwn(footerItems, item.id)) {
-                  count = footerItems[item.id];
-                }
-                return (
-                  <Product disabled={true} dollarPrice={dollarPrice} calcFooter={calcFooter} item={item} selectedCount={count} />
+                  <Product key={item.id} disabled={true} dollarPrice={dollarPrice} calcFooter={calcFooter} item={item} selectedCount={count} />
                 )
-              }}
-            />
-            <InfoBar info={footerInfo} formInfo={[formData, setFormData]} />
-            <View style={styles.actionsBox}>
-              <Pressable onPress={togglePreviewMood}>
-                <AntDesign style={globalStyles.cartBtn} name="eyeo" size={24} color="black" />
-              </Pressable>
-              <View style={{ flexDirection: "row", gap: 12 }}>
-                <Pressable onPress={() => {makeOrder(1)}}>
-                  <View style={styles.orderBtn}>
-                    <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
-                    <Text style={styles.orderBtnText}>تقسيم</Text>
-                  </View>
-                </Pressable>
-                <Pressable onPress={() => {makeOrder(2)}}>
-                  <View style={styles.orderBtn}>
-                    <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
-                    <Text style={styles.orderBtnText}>اسنيورت</Text>
-                  </View>
-                </Pressable>
-              </View>
-              <Pressable onPress={onSaveImageAsync}>
-                <AntDesign style={{ ...globalStyles.cartBtn, backgroundColor: "#289e16", color: "#dcfadc"}} name="camerao" size={24} color="black" />
-              </Pressable>
+              })}
             </View>
-          </>
-        }
-      </ViewShot>
+            <InfoBar info={footerInfo} formInfo={[formData, setFormData]} />
+          </ViewShot>
+        <View style={styles.actionsBox}>
+          <Pressable onPress={togglePreviewMood}>
+            {/* <AntDesign  name="eyeo" size={24} color="black" /> */}
+            <Entypo style={globalStyles.cartBtn} name="back" size={24} color="black" />
+          </Pressable>
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            <Pressable onPress={() => {makeOrder(1)}}>
+              <View style={styles.orderBtn}>
+                <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
+                <Text style={styles.orderBtnText}>{langs[language].taksim}</Text>
+              </View>
+            </Pressable>
+            <Pressable onPress={() => {makeOrder(2)}}>
+              <View style={styles.orderBtn}>
+                <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
+                <Text style={styles.orderBtnText}>{langs[language].essenyurt}</Text>
+              </View>
+            </Pressable>
+          </View>
+          <Pressable onPress={onSaveImageAsync}>
+            <AntDesign style={{ ...globalStyles.cartBtn, backgroundColor: "#289e16", color: "#dcfadc"}} name="camerao" size={24} color="black" />
+          </Pressable>
+        </View>
+      </ScrollView>
+      }
     </>
   );
 
@@ -257,11 +271,14 @@ const styles = StyleSheet.create({
     color: "white",
     borderRadius: 8,
     flexDirection: "row",
+    minWidth: 90,
+    textAlign: "center",
     gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 8
   },
   orderBtnText: {
+    fontSize: 12,
     color: "white",
   },
 })
