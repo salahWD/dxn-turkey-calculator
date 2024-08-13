@@ -1,7 +1,9 @@
 import React, { useEffect, useContext, useState, useRef, MutableRefObject } from "react";
-import { Alert, ScrollView, FlatList, StatusBar, StyleSheet, View, Text, Pressable } from "react-native";
+import { Alert, ScrollView, FlatList, StatusBar, StyleSheet, View, Text, Pressable, Linking } from "react-native";
+import Share from 'react-native-share';
+import { Social } from 'react-native-share';
 
-// import Share from 'react-native-share';
+
 import * as MediaLibrary from "expo-media-library";
 
 import { serverUrl, globalStyles } from "../constants/global";
@@ -19,7 +21,6 @@ import Entypo from '@expo/vector-icons/Entypo';
 
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
-import { collectionGroup } from "firebase/firestore";
 
 export default function ProductsScreen() {
 
@@ -151,19 +152,33 @@ export default function ProductsScreen() {
 
     if (branch == 1) {// taksim branch
       // url = "whatsapp://send?phone=905528666050?text=" + msg;
-      url = "whatsapp://send?phone=905528666050&text=Check%20out%20this%20screenshot!";
+      url = "whatsapp://send?phone=905527188570&text=test";
     }else {// essenyurt branch
       // url = "whatsapp://send?phone=905444482988?text=" + msg;
-      url = "whatsapp://send?phone=905528666050&text=Check%20out%20this%20screenshot!";
+      url = "whatsapp://send?phone=905527188570&text=test";
     }
-    Share.open({
-      title: 'Share Screenshot',
-      url: uri,
-      message: 'Check out this screenshot!',
-      // social: Share.Social.WHATSAPP,
-    })
-    .then(e => console.log(e))
-    .catch(e => console.error(e));
+    // Linking.openURL(url)
+    // const shareOptions = {
+    //   title: 'Share via',
+    //   message: 'some message',
+    //   url: uri,
+    //   social: Share.Social.WHATSAPP as Social.Whatsapp,
+    //   whatsAppNumber: "905527188570",  // country code + phone number
+    //   filename: 'test' , // only for base64 file in Android
+    //   appId: "testingappid",
+    // };
+  
+    // Share.shareSingle(shareOptions)
+    //   .then((res) => { console.log(res) })
+    //   .catch((err) => { err && console.log(err); });
+    // Share.open({
+    //   title: 'Share Screenshot',
+    //   url: uri,
+    //   message: 'Check out this screenshot!',
+    //   // social: Share.Social.WHATSAPP,
+    // })
+    // .then(e => console.log(e))
+    // .catch(e => console.error(e));
   }
 
   const onSaveImageAsync = async (willReturn=false) => {
@@ -246,7 +261,7 @@ export default function ProductsScreen() {
               </View>
             </Pressable>
           </View>
-          <Pressable onPress={onSaveImageAsync}>
+          <Pressable onPress={() => {onSaveImageAsync()}}>
             <AntDesign style={{ ...globalStyles.cartBtn, backgroundColor: "#289e16", color: "#dcfadc"}} name="camerao" size={24} color="black" />
           </Pressable>
         </View>

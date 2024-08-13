@@ -3,7 +3,7 @@
     "name": "dxn-calculator",
     "slug": "hasbh-dxn-ballyrh-altrkyh",
     "version": "1.0.0",
-    "orientation": "PORTRAIT",
+    "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "plugins": [
@@ -29,7 +29,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "permissions": ["android.permission.ACCESS_MEDIA_LOCATION"],
+      "permissions": [
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
       "package": "test.salatemps.hasbhdxnballyrhaltrkyh"
     },
     "web": {
@@ -37,7 +41,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "08e07e18-4b51-4db4-91a8-182d8743d42e"
+        "projectId": "39c2a95a-263b-4116-a07f-a5ddfde82328"
       }
     },
     "owner": "salahtemps"

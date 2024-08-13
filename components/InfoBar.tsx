@@ -25,14 +25,6 @@ const citiesList = [
   "Şanlıurfa",
 ];
 
-const residentialAreasList = [
-  "essenyurt",
-  "taksim",
-  "tahala",
-  "blabla",
-  "bleble",
-];
-
 const langs = {
   ar: {
     total_price: "السعرالكلّي",
@@ -91,9 +83,6 @@ export function InfoBar({ info: {price, shippingPrice, points, products}, formIn
           </View>
           <View style={styles.inputRow}>
             <TextInput onChangeText={(e) => {setFormData({...formData, phone: e})}} value={formData.phone} inputMode='numeric' style={{ ...styles.textInput, }} placeholder={langs[language].phonePlaceholder} />
-            {/* <TextInput onChangeText={(e) => {setFormData({...formData, city: e})}}
-            value={formData.city}
-            style={styles.textInput} placeholder='المدينة' /> */}
             <SelectDropdown
               defaultValue={formData.city}
               data={citiesList}
@@ -103,7 +92,7 @@ export function InfoBar({ info: {price, shippingPrice, points, products}, formIn
               renderButton={(selectedItem, isOpened) => {
                 return (
                   <View style={styles.dropdownButtonStyle}>
-                    <Text style={styles.dropdownButtonTxtStyle}>
+                    <Text style={selectedItem != null ? {color: "#333"} : styles.dropdownButtonTxtStyle}>
                       {(selectedItem != null && selectedItem) || langs[language].cityPlaceholder}
                     </Text>
                     <Icon name={isOpened ? 'chevron-up' : 'chevron-down'} style={styles.dropdownButtonArrowStyle} />
@@ -203,7 +192,6 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     paddingHorizontal: 12,
   },
-
   dropdownButtonStyle: {
     backgroundColor: '#F5F5F5',
     borderRadius: 4,
