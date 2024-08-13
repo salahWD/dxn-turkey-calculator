@@ -1,8 +1,7 @@
 import React, { useEffect, useContext, useState, useRef, MutableRefObject } from "react";
 import { Alert, ScrollView, FlatList, StatusBar, StyleSheet, View, Text, Pressable, Linking } from "react-native";
-import Share from 'react-native-share';
-import { Social } from 'react-native-share';
-
+// import Share from 'react-native-share';
+// import { Social } from 'react-native-share';
 
 import * as MediaLibrary from "expo-media-library";
 
@@ -149,36 +148,24 @@ export default function ProductsScreen() {
     const uri = await onSaveImageAsync(true);
     await MediaLibrary.saveToLibraryAsync(uri);
     let url = '';
-
+    let testImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAADMElEQVR4nOzVwQnAIBQFQYXff81RUkQCOyDj1YOPnbXWPmeTRef+/3O/OyBjzh3CD95BfqICMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMO0TAAD//2Anhf4QtqobAAAAAElFTkSuQmCC';
     if (branch == 1) {// taksim branch
       // url = "whatsapp://send?phone=905528666050?text=" + msg;
-      url = "whatsapp://send?phone=905527188570&text=test";
+      url = "whatsapp://send?phone=905527188570&text=" + encodeURIComponent(testImage);
     }else {// essenyurt branch
       // url = "whatsapp://send?phone=905444482988?text=" + msg;
-      url = "whatsapp://send?phone=905527188570&text=test";
+      url = "whatsapp://send?phone=905527188570&text=" + encodeURIComponent(testImage);
     }
-    // Linking.openURL(url)
-    // const shareOptions = {
-    //   title: 'Share via',
-    //   message: 'some message',
-    //   url: uri,
-    //   social: Share.Social.WHATSAPP as Social.Whatsapp,
-    //   whatsAppNumber: "905527188570",  // country code + phone number
-    //   filename: 'test' , // only for base64 file in Android
-    //   appId: "testingappid",
-    // };
-  
-    // Share.shareSingle(shareOptions)
-    //   .then((res) => { console.log(res) })
-    //   .catch((err) => { err && console.log(err); });
-    // Share.open({
-    //   title: 'Share Screenshot',
-    //   url: uri,
-    //   message: 'Check out this screenshot!',
-    //   // social: Share.Social.WHATSAPP,
-    // })
-    // .then(e => console.log(e))
-    // .catch(e => console.error(e));
+    try {
+
+      Linking.openURL(url).catch(() => {
+        alert('Make sure WhatsApp is installed on your device');
+      });
+
+    } catch (error) {
+      console.log('Error =>', error);
+    }
+
   }
 
   const onSaveImageAsync = async (willReturn=false) => {
