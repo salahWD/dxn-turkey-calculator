@@ -1,11 +1,11 @@
 import React, { useEffect, useContext, useState, useRef, MutableRefObject } from "react";
 import { Alert, ScrollView, FlatList, StatusBar, StyleSheet, View, Text, Pressable, Linking } from "react-native";
-import Share from 'react-native-share';
 
 import * as MediaLibrary from "expo-media-library";
 
 import { serverUrl, globalStyles } from "../constants/global";
-import { productPrice, getDollarPrice } from '../util/productPrice';
+import { productPrice, getDollarPrice, getProductsFromDB } from '../util/productPrice';
+
 import { Product } from "../components/Product";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
@@ -61,20 +61,18 @@ export default function ProductsScreen() {
 
   useEffect(() => {
 
-    fetch(serverUrl + "/assets/products.json").then(res => {
-      return res.json();
-    }).then(res => {
+    const gettingProducts = async () => {
+      const res = await getProductsFromDB();
       setProducts(res);
-    }).catch(err => {
-      console.error("eeeee", err)
-      throw new Error("Erro Fetching Products => ", err);
-    })
+      console.log("Done !!")
+    }
 
     const fetchDollarPrice = async () => {
       const price = await getDollarPrice();
       setDollarPrice(price);
     };
 
+    gettingProducts();
     fetchDollarPrice();
 
   }, []);

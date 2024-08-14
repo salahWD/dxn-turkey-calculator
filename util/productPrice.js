@@ -1,5 +1,11 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, getDoc, doc } from "firebase/firestore";
+import {
+  getFirestore,
+  getDoc,
+  doc,
+  collection,
+  getDocs,
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAoV1Zuus1ujVzAxnvYCkHHI6O3pyP-yFM",
@@ -11,7 +17,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+export const db = getFirestore(app);
 
 export const getDollarPrice = async () => {
   let dollarPrice = 32;
@@ -33,6 +39,24 @@ export const getDollarPrice = async () => {
   }
 
   return dollarPrice;
+};
+
+export const getProductsFromDB = async () => {
+  try {
+    let products = [];
+    const querySnapshot = await getDocs(collection(db, "products"));
+
+    querySnapshot.forEach((doc) => {
+      products.push({ id: doc.id, ...doc.data() });
+    });
+
+    // Sort products by their numeric ID
+    return products.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+  } catch (error) {
+    console.error("Error fetching products: ", error);
+    const res = await fetch(serverUrl + "/assets/products.json");
+    return res.json();
+  }
 };
 
 export const productPrice = (dollar, initPrice) => {
