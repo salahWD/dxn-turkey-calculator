@@ -64,7 +64,6 @@ export default function ProductsScreen() {
     const gettingProducts = async () => {
       const res = await getProductsFromDB();
       setProducts(res);
-      console.log("Done !!")
     }
 
     const fetchDollarPrice = async () => {
@@ -96,17 +95,21 @@ export default function ProductsScreen() {
   const createOrderMessage = () => {
 
     let msg = '';
-    selectedProducts.forEach(product => {
-      console.log(product)
+    selectedProducts.forEach((product, index) => {
       msg += `%0a المنتج: *${product.title.ar}*`;
       msg += `%0a العدد: *${footerItems[product.id]}*`;
-      msg += `%0a ـ----------------------------`;
+      if (selectedProducts.length - 1 != index) {
+        msg += `%0a ـ----------------------------`;
+      }
     });
+
     msg += `%0a *ـ=================*`;
-    msg += `%0a السعر: *${footerInfo.price}*`;
-    msg += `%0a الشحن: *${footerInfo.shippingPrice}*`;
-    msg += `%0a النقاط: *${footerInfo.points}*`;
-    msg += `%0a عدد المنتجات: *${footerInfo.products}*`;
+    msg += `%0a الاسم: ${formData.name ? `*${formData.name}*` : ""}`;
+    msg += `%0a رقم العضوية: ${formData.membership ? `${formData.membership}` : ""}`;
+    msg += `%0a اسم المستلم: ${formData.recipient ? `*${formData.recipient}*` : ""}`;
+    msg += `%0a المدينة: ${formData.city ? `*${formData.city}*` : ""}`;
+    msg += `%0a العنوان: ${formData.address ? `*${formData.address}*` : ""}`;
+    msg += `%0a رقم الهاتف: ${formData.phone ? `${formData.phone}` : ""}`;
     return msg;
   }
 
@@ -148,33 +151,16 @@ export default function ProductsScreen() {
   }
 
   const makeOrder = async (branch: number) => {
-    const uri = await onSaveImageAsync(true);
-    await MediaLibrary.saveToLibraryAsync(uri);
-
-    // let testImage = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAAADMElEQVR4nOzVwQnAIBQFQYXff81RUkQCOyDj1YOPnbXWPmeTRef+/3O/OyBjzh3CD95BfqICMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMK0CMO0TAAD//2Anhf4QtqobAAAAAElFTkSuQmCC';
-    
-    // const shareOptions = {
-    //   title: 'Share image to WhatsApp',
-    //   message: 'Check out this image!',
-    //   url: testImage,
-    //   social: Share.Social.WHATSAPP,
-    //   whatsAppNumber: '+905527188570',
-    // };
-  
-    // try {
-    //   await Share.shareSingle(shareOptions);
-    // } catch (error) {
-    //   console.error('Error sharing to WhatsApp', error);
-    // }
+    await saveInputs();
 
     let url = '';
-    
+
     if (branch == 1) {// taksim branch
-      // url = "whatsapp://send?phone=905528666050?text=" + msg;
-      url = "whatsapp://send?phone=905527188570&text=" + createOrderMessage();
+      url = "whatsapp://send?phone=905528666050&text=" + createOrderMessage();
+      // url = "whatsapp://send?phone=905527188570&text=" + createOrderMessage();
     }else {// essenyurt branch
-      // url = "whatsapp://send?phone=905444482988?text=" + msg;
-      url = "whatsapp://send?phone=905527188570&text=" + createOrderMessage();
+      // url = "whatsapp://send?phone=905527188570&text=" + createOrderMessage();
+      url = "whatsapp://send?phone=905444482988&text=" + createOrderMessage();
     }
     try {
 
@@ -183,7 +169,7 @@ export default function ProductsScreen() {
       });
 
     } catch (error) {
-      console.log('Error =>', error);
+      console.error('Error =>', error);
     }
 
   }

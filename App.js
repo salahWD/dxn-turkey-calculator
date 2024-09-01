@@ -7,13 +7,16 @@ import ProductsScreen from "./screens/ProductsScreen";
 import * as MediaLibrary from "expo-media-library";
 import { LangContext } from "./langContext.ts";
 
+import { I18nManager } from "react-native";
+
+I18nManager.forceRTL(false);
+I18nManager.allowRTL(false);
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   const [lang, setLang] = useState("ar");
   const [status, requestPermission] = MediaLibrary.usePermissions();
-  useState;
 
   if (status === null) {
     requestPermission();
