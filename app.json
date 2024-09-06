@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "حاسبة تركيا",
+    "name": "حاسبة DXN بالليرة التركية",
     "slug": "hasbh-dxn-ballyrh-altrkyh",
-    "version": "1.0.1",
+    "version": "1.1.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
