@@ -1,6 +1,6 @@
 {
-  "name": "hasbh-dxn-ballyrh-altrkyh",
-  "version": "2",
+  "name": "dxn-tl-calculator",
+  "version": "1",
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",

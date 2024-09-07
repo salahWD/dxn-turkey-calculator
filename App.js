@@ -4,7 +4,6 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import ProductsScreen from "./screens/ProductsScreen";
-import * as MediaLibrary from "expo-media-library";
 import { LangContext } from "./langContext.ts";
 
 import { I18nManager } from "react-native";
@@ -16,11 +15,6 @@ SplashScreen.preventAutoHideAsync();
 
 export default function App() {
   const [lang, setLang] = useState("ar");
-  const [status, requestPermission] = MediaLibrary.usePermissions();
-
-  if (status === null) {
-    requestPermission();
-  }
 
   const [loaded] = useFonts({
     "zain-black": require("./assets/fonts/Zain-Black.ttf"),

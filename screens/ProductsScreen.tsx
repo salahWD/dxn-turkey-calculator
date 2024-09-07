@@ -1,8 +1,6 @@
 import React, { useEffect, useContext, useState, useRef, MutableRefObject } from "react";
 import { Alert, ScrollView, FlatList, StatusBar, StyleSheet, View, Text, Pressable, Linking } from "react-native";
 
-import * as MediaLibrary from "expo-media-library";
-
 import { serverUrl, globalStyles } from "../constants/global";
 import { productPrice, getDollarPrice, getProductsFromDB } from '../util/productPrice';
 
@@ -178,11 +176,9 @@ export default function ProductsScreen() {
     await saveInputs();
     try {
 
-      // const imageUri = await imageRef.current.capture();
       const imageUri = await captureRef(imageRef, {
         format: "png",
         quality: 0.9,
-        // snapshotContentContainer: true,
       });
       if (willReturn) {
         return imageUri;

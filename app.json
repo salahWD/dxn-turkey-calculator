@@ -2,8 +2,8 @@
   "versionCode": 2,
   "expo": {
     "name": "حاسبة DXN بالليرة التركية",
-    "slug": "hasbh-dxn-ballyrh-altrkyh",
-    "version": "2",
+    "slug": "dxn-tl-calculator",
+    "version": "1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -38,7 +38,7 @@
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
-      "package": "test.salatemps.hasbhdxnballyrhaltrkyh",
+      "package": "com.salahbakhash.hasbhdxnballyrhaltrkyh",
       "runtimeVersion": "1.0.0"
     },
     "web": {
@@ -46,7 +46,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "39c2a95a-263b-4116-a07f-a5ddfde82328"
+        "projectId": "dcb0e780-04eb-41f6-8840-e7a4de60ae07"
       }
     },
     "owner": "salahtemps",
