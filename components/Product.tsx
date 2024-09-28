@@ -8,10 +8,10 @@ import SelectDropdown from 'react-native-select-dropdown'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 
-const productCountList = Array.from(Array(30).keys());
+const productCountList = Array.from(Array(50).keys());
 
 export type ProductProps = {
-  item: {id: number, title: string, img: String, price: number, points: number},
+  item: {id: number, title: string, img: String, price: number, points: number, special?: boolean},
   calcFooter: Function,
   dollarPrice?: number,
   selectedCount?: number,
@@ -30,18 +30,19 @@ export function Product({ item, calcFooter, customStyle, dollarPrice=0, selected
   }
 
   return (
-    <View style={{ ...styles.product, ...customStyle, backgroundColor: count > 0 ? "#98f2a4": "#e1e4eb", borderWidth: count > 0 ? 0 : .5 }}>
-      <View style={{ ...styles.cell, borderLeftWidth: 0, flex: 3 }}>
+    <View style={{ ...styles.product, ...customStyle, backgroundColor: item?.special ? "#c7b2d9" : (count > 0 ? "#98f2a4": "#e1e4eb"), borderWidth: 0.5, borderColor: item?.special && item.special == true ? "#808080": "#cfcfcf" }}>
+      <View style={{ ...styles.cell, borderLeftWidth: 0, flex: 3, borderColor: item?.special && item.special == true ? "#808080": "#cfcfcf" }}>
         <Text style={styles.text}>{item.title[language]}</Text>
       </View>
-      <View style={{ ...styles.cell, flex: 1 }}>
+      <View style={{ ...styles.cell, flex: 1, borderColor: item?.special && item.special == true ? "#808080": "#cfcfcf" }}>
         <Text style={styles.text}>{item.points}</Text>
       </View>
-      <View style={styles.cell}>
+      <View style={{ ...styles.cell, borderColor: item?.special && item.special == true ? "#808080": "#cfcfcf" }}>
         <Text style={styles.text}>{productPrice(dollarPrice, item.price).toFixed(1)}</Text>
       </View>
-      <View style={ styles.cell }>
+      <View style={{ ...styles.cell, borderColor: item?.special && item.special == true ? "#808080": "#cfcfcf" }}>
         <SelectDropdown
+          statusBarTranslucent={true}
           defaultValue={selectedCount}
           disabled={disabled}
           data={productCountList}
@@ -69,7 +70,7 @@ export function Product({ item, calcFooter, customStyle, dollarPrice=0, selected
           dropdownStyle={styles.dropdownMenuStyle}
         />
       </View>
-      <View style={{ ...styles.cell, paddingRight: 9, }}>
+      <View style={{ ...styles.cell, paddingRight: 9, borderColor: item?.special && item.special == true ? "#808080": "#cfcfcf" }}>
         <Text style={styles.text}>{item.points * count}</Text>
       </View>
       {/* <View style={styles.cell}>
@@ -84,7 +85,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderStyle: 'solid',
     flexDirection: "row",
-    borderColor: '#cfcfcf',
     display: "flex",
     borderWidth: 1,
     gap: 8,

@@ -1,8 +1,8 @@
 import React, { useEffect, useContext, useState, useRef, MutableRefObject } from "react";
-import { Alert, ScrollView, FlatList, StatusBar, StyleSheet, View, Text, Pressable, Linking, Modal } from "react-native";
+import { Alert, ScrollView, FlatList, StatusBar, StyleSheet, View, Text, Pressable, Linking } from "react-native";
 
 import { globalStyles } from "../constants/global";
-import { productPrice, getDollarPrice, getShippingPrices, getProductsFromDB, getIOCLimit } from '../util/productPrice';
+import { productPrice, getDollarPrice, getProductsFromDB, getShippingPrices, getIOCLimit } from '../util/productPrice';
 
 import { Product } from "../components/Product";
 import { Header } from "../components/Header";
@@ -31,7 +31,6 @@ export default function ProductsScreen() {
   const [footerItems, setFooterItems] = useState({});
   const [footerInfo, setFooterInfo] = useState({price: 0, points: 0, shippingPrice: 110, products: 0, discountPrice: 0});
   const [previewMood, setPreviewMood] = useState(true);
-  const [modalVisible, setModalVisible] = useState(false);
   const [formData, setFormData] = useState({
     phone: null,
     membership: null,
@@ -41,12 +40,14 @@ export default function ProductsScreen() {
     city: null,
   });
   const [orderType, setOrderType] = useState(0);
-
+  
   useEffect(() => {
 
     const fetchDBInfo = async () => {
       const res = await getProductsFromDB();
-      setProducts(res);
+      setProducts(res.filter(item => {
+        return item.special != null && item.special ? false : true;
+      }));
 
       setShippingRules(await getShippingPrices());
 
@@ -55,7 +56,7 @@ export default function ProductsScreen() {
 
       const iotLimit = await getIOCLimit();
       setIOCLimit(iotLimit);
-
+      
     }
 
     fetchDBInfo();
@@ -67,7 +68,6 @@ export default function ProductsScreen() {
       free: "مجاناً",
       essenyurt: "اسنيورت",
       taksim: "تقسيم",
-      send: "طلب",
       no_selected_product_title: "لا يوجد منتجات !",
       no_selected_product_desc: "لم يتم اختيار أي منتجات, يرجى اختيار بعض المنتجات قبل الإنتقال لصفحة المعلومات.",
       ioc_min_limit_title: "أقل من الحد الأدنى !",
@@ -75,14 +75,12 @@ export default function ProductsScreen() {
       discount_10: "خصم 10%",
       asp_point_limit_title: "أقل من 100 نقطة !",
       asp_point_limit_desc: "يجب ان تتعدى نقاط الطلبية المائة نقطة في نظام (ASP) كي يتم قبول الطلبية",
-      normal_system: "النظام العادي",
       alert_btn: "حسناً",
     },
     tr: {
       free: "free",
       essenyurt: "Essenyurt",
       taksim: "Taksim",
-      send: "send",
       no_selected_product_title: "No products!",
       no_selected_product_desc: "No products selected, please select some products before moving to the information page.",
       ioc_min_limit_title: "Less than the minimum price limit!",
@@ -90,7 +88,6 @@ export default function ProductsScreen() {
       discount_10: "discount 10%",
       asp_point_limit_title: "Less than 100 points !",
       asp_point_limit_desc: "in ASP system, a 100 point at least is required for the order to be accepted !",
-      normal_system: "normal",
       alert_btn: "Ok",
     }
   }
@@ -99,7 +96,7 @@ export default function ProductsScreen() {
     if (previewMood) {// main page
       const selectedProds = products.filter(product => Object.keys(footerItems).includes(String(product.id)));
       if (selectedProds.length > 0) {
-        if (orderType == 1) {
+        if (orderType == 0) {
           if (footerInfo.price > productPrice(dollarPrice, IOCLimit)) {
   
             setSelectedProducts(selectedProds);
@@ -109,7 +106,7 @@ export default function ProductsScreen() {
               text: langs[language].alert_btn,
             }]);  
           }
-        }else if (orderType == 2) {
+        }else if (orderType == 1) {
           if (footerInfo.points >= 100) {
   
             setSelectedProducts(selectedProds);
@@ -133,7 +130,6 @@ export default function ProductsScreen() {
     }
   }
 
-
   const createOrderMessage = () => {
 
     let msg = '';
@@ -146,22 +142,7 @@ export default function ProductsScreen() {
     });
 
     msg += `%0a *ـ=================*`;
-    msg += `%0a نوع الطلبية: *${["عادية (SIMP)", "IOC", "ASP", "خصم 10 بالمئة"][orderType]}*`;
-    msg += `%0a *ـ=================*`;
-    if (footerInfo.discountPrice > 0) {
-      msg += `%0a سعر الطلبية: *~${footerInfo.price}~* TL`;
-      msg += `%0a بعد الخصم: *${footerInfo.discountPrice}* TL`;
-    }else {
-      msg += `%0a سعر الطلبية: *${footerInfo.price}* TL`;
-    }
-    msg += `%0a سعر الشحن: *${footerInfo.shippingPrice == 0 ? langs[language].free : footerInfo.shippingPrice}* TL`;
-    if (footerInfo.discountPrice > 0) {
-      msg += `%0a الإجمالي: *${footerInfo.discountPrice + footerInfo.shippingPrice}* ${footerInfo.shippingPrice == 0 ? "" : " TL"}`;
-    }else {
-      msg += `%0a الإجمالي: *${footerInfo.price + footerInfo.shippingPrice}* TL`;
-    }
-    msg += `%0a إجمالي النقاط: *${footerInfo.points}*`;
-    msg += `%0a عدد المنتجات: *${footerInfo.products}*`;
+    msg += `%0a نوع الطلبية: *${["IOC", "ASP", "خصم 10 بالمئة"][orderType]}*`;
     msg += `%0a *ـ=================*`;
     msg += `%0a الاسم: ${formData.name ? `*${formData.name}*` : ""}`;
     msg += `%0a رقم العضوية: ${formData.membership ? `${formData.membership}` : ""}`;
@@ -200,11 +181,11 @@ export default function ProductsScreen() {
       }
     })
 
-    if (orderType == 3) {
+    if (orderType == 2) {
       setFooterInfo({
         price: parseFloat(price.toFixed(2)),
         points: parseFloat(points.toFixed(2)),
-        shippingPrice: shippingPrice,
+        shippingPrice: shippingPrice == 0 ? langs[language].free : shippingPrice,
         products: totalProducts,
         discountPrice: parseFloat((price * 0.9).toFixed(2)),
       });
@@ -212,7 +193,7 @@ export default function ProductsScreen() {
       setFooterInfo({
         price: parseFloat(price.toFixed(2)),
         points: parseFloat(points.toFixed(2)),
-        shippingPrice: shippingPrice,
+        shippingPrice: shippingPrice == 0 ? langs[language].free : shippingPrice,
         products: totalProducts,
         discountPrice: 0,
       });
@@ -239,8 +220,8 @@ export default function ProductsScreen() {
       // url = "whatsapp://send?phone=905527188570&text=" + createOrderMessage();
       url = "whatsapp://send?phone=905444482988&text=" + createOrderMessage();
     }
-    
     try {
+
       Linking.openURL(url).catch(() => {
         alert('Make sure WhatsApp is installed on your device');
       });
@@ -272,124 +253,100 @@ export default function ProductsScreen() {
   const updateFooterCalc = (i) => {
     setOrderType(i)
     if (i == 3) {
-      setFooterInfo({...footerInfo, discountPrice: parseFloat((footerInfo.price * 0.9).toFixed(2))});
+      setFooterInfo({...footerInfo, discountPrice: footerInfo.price * 0.9});
     }else {
       setFooterInfo({...footerInfo, discountPrice: 0});
     }
   };
 
+
   return (
-    <>
-      <Modal
-        statusBarTranslucent
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}>
-        <Pressable style={{ flex: 1, }} onPress={() => setModalVisible(false)}>
-          <View style={styles.centeredView}>
-            <Pressable style={{ width: 250, alignItems: "center", justifyContent: "center" }} onPress={(e) => e.stopPropagation()}>
-              <View style={styles.modalView}>
-                <Pressable onPress={() => {makeOrder(2)}}>
-                  <View style={styles.orderBtn}>
-                    <Text style={styles.orderBtnText}>{langs[language].essenyurt}</Text>
-                  </View>
-                </Pressable>
-                <Pressable onPress={() => {makeOrder(1)}}>
-                  <View style={ styles.orderBtn }>
-                    <Text style={{ ...styles.orderBtnText }}>{langs[language].taksim}</Text>
-                  </View>
-                </Pressable>
-              </View>
-            </Pressable>
-          </View>
-        </Pressable>
-      </Modal>
-      <View style={{ backgroundColor: "#e9fbf1", flex: 1 }}>
-        <StatusBar hidden={true} translucent/>
-        {previewMood && <>
-            <View style={ styles.orderType } >
-              <Pressable onPress={e => {
-                  updateFooterCalc(0);
-                }}>
-                <Text style={ orderType == 0 ? {...styles.orderTypeBtn} : {...styles.orderTypeBtn, opacity: 0.4} }>{langs[language].normal_system} (SIMP)</Text>
-              </Pressable>
-              <Pressable onPress={e => {
-                  updateFooterCalc(1);
-                }}>
-                <Text style={ orderType == 1 ? {...styles.orderTypeBtn} : {...styles.orderTypeBtn, opacity: 0.4} }>IOC</Text>
-              </Pressable>
-              <Pressable onPress={e => {
-                  updateFooterCalc(2);
-                }}>
-                <Text style={ orderType == 2 ? {...styles.orderTypeBtn} : {...styles.orderTypeBtn, opacity: 0.4} }>ASP</Text>
-              </Pressable>
-              <Pressable onPress={e => {
-                  updateFooterCalc(3);
-                }}>
-                <Text style={ orderType == 3 ? {...styles.orderTypeBtn} : {...styles.orderTypeBtn, opacity: 0.4} }>{ langs[language].discount_10 }</Text>
-              </Pressable>
-            </View>
-            <Header dollarPrice={dollarPrice} />
-            <FlatList
-              keyExtractor={(
-                item: { id: number, title: string, img: String }
-              ): string => String(item.id)}
-              data={products}
-              renderItem={({ item }) => {
+    <View style={{ backgroundColor: "#e9fbf1", flex: 1 }}>
+      <StatusBar hidden={true} translucent/>
+      {previewMood && 
+        <>
+        <View style={ styles.orderType } >
+          <Pressable onPress={e => {
+              updateFooterCalc(0);
+            }}>
+            <Text style={ orderType == 0 ? {...styles.orderTypeBtn} : {...styles.orderTypeBtn, opacity: 0.4} }>النظام العادي (SIMP)</Text>
+          </Pressable>
+          <Pressable onPress={e => {
+              updateFooterCalc(1);
+            }}>
+            <Text style={ orderType == 1 ? {...styles.orderTypeBtn} : {...styles.orderTypeBtn, opacity: 0.4} }>IOC</Text>
+          </Pressable>
+          <Pressable onPress={e => {
+              updateFooterCalc(2);
+            }}>
+            <Text style={ orderType == 2 ? {...styles.orderTypeBtn} : {...styles.orderTypeBtn, opacity: 0.4} }>ASP</Text>
+          </Pressable>
+          <Pressable onPress={e => {
+              updateFooterCalc(3);
+            }}>
+            <Text style={ orderType == 3 ? {...styles.orderTypeBtn} : {...styles.orderTypeBtn, opacity: 0.4} }>{ langs[language].discount_10 }</Text>
+          </Pressable>
+        </View>
+        <Header dollarPrice={dollarPrice} />
+          <FlatList
+            keyExtractor={(
+              item: { id: number, title: string, img: String }
+            ): string => String(item.id)}
+            data={products}
+            renderItem={({ item }) => {
+              let count = 0;
+              if (Object.hasOwn(footerItems, item.id)) {
+                count = footerItems[item.id];
+              }
+              return (
+              <Product calcFooter={calcFooter} dollarPrice={dollarPrice} item={item} selectedCount={count} />
+            )}}
+          />
+          <Footer togglePreviewMood={togglePreviewMood} info={footerInfo} />
+        </>
+      }
+      {!previewMood && 
+        <ScrollView style={{ flex: 1, backgroundColor: "#defafc"}} contentContainerStyle={{ minHeight: "100%"}}>
+          <ViewShot ref={imageRef} style={{ flex: 1, backgroundColor: "#defafc" }} options={{ format: "png", quality: 1 }}>
+            <Header key="header" dollarPrice={dollarPrice} />
+            <View style={{ flex: 1 }}>
+              {selectedProducts.map(item => {
                 let count = 0;
                 if (Object.hasOwn(footerItems, item.id)) {
                   count = footerItems[item.id];
                 }
-                if (orderType == 0 || !(item.special != null && item.special)) {
-                  return (
-                    <Product calcFooter={calcFooter} dollarPrice={dollarPrice} item={item} selectedCount={count} />
-                  )
-                }else {
-                  return null
-                }
-            }}
-            />
-            <Footer togglePreviewMood={togglePreviewMood} info={footerInfo} />
-        </>}
-        {!previewMood && 
-          <ScrollView style={{ flex: 1, backgroundColor: "#defafc"}} contentContainerStyle={{ minHeight: "100%"}}>
-            <ViewShot ref={imageRef} style={{ flex: 1, backgroundColor: "#defafc" }} options={{ format: "png", quality: 1 }}>
-              <Header key="header" dollarPrice={dollarPrice} />
-              <View style={{ flex: 1 }}>
-                {selectedProducts.map(item => {
-                  let count = 0;
-                  if (Object.hasOwn(footerItems, item.id)) {
-                    count = footerItems[item.id];
-                  }
-                  return (
-                    <Product key={item.id} disabled={true} dollarPrice={dollarPrice} calcFooter={calcFooter} item={item} selectedCount={count} />
-                  )
-                })}
-              </View>
-              <InfoBar info={footerInfo} formInfo={[formData, setFormData]} />
-            </ViewShot>
-          <View style={styles.actionsBox}>
-            <Pressable onPress={togglePreviewMood}>
-              <Entypo style={globalStyles.cartBtn} name="back" size={24} color="black" />
-            </Pressable>
-            <View style={{ flexDirection: "row", gap: 12 }}>
-              <Pressable onPress={() => {setModalVisible(true)}}>
-                <View style={ styles.orderBtn }>
-                  <Text style={{ ...styles.orderBtnText }}>{langs[language].send}</Text>
-                </View>
-              </Pressable>
+                return (
+                  <Product key={item.id} disabled={true} dollarPrice={dollarPrice} calcFooter={calcFooter} item={item} selectedCount={count} />
+                )
+              })}
             </View>
-            <Pressable onPress={() => {onSaveImageAsync()}}>
-              <AntDesign style={{ ...globalStyles.cartBtn, backgroundColor: "#3dcc5a", color: "#dcfadc"}} name="camerao" size={24} color="black" />
+            <InfoBar info={footerInfo} formInfo={[formData, setFormData]} />
+          </ViewShot>
+        <View style={styles.actionsBox}>
+          <Pressable onPress={togglePreviewMood}>
+            <Entypo style={globalStyles.cartBtn} name="back" size={24} color="black" />
+          </Pressable>
+          <View style={{ flexDirection: "row", gap: 12 }}>
+            <Pressable onPress={() => {makeOrder(1)}}>
+              <View style={styles.orderBtn}>
+                <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
+                <Text style={styles.orderBtnText}>{langs[language].taksim}</Text>
+              </View>
+            </Pressable>
+            <Pressable onPress={() => {makeOrder(2)}}>
+              <View style={styles.orderBtn}>
+                <Entypo name="shopping-cart" size={18} color="#dbf6e0" />
+                <Text style={styles.orderBtnText}>{langs[language].essenyurt}</Text>
+              </View>
             </Pressable>
           </View>
-          </ScrollView>
-        }
-      </View>
-    </>
+          <Pressable onPress={() => {onSaveImageAsync()}}>
+            <AntDesign style={{ ...globalStyles.cartBtn, backgroundColor: "#289e16", color: "#dcfadc"}} name="camerao" size={24} color="black" />
+          </Pressable>
+        </View>
+        </ScrollView>
+      }
+    </View>
   );
 
 }
@@ -400,8 +357,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: '#afebf0',
     alignItems: "center",
-    paddingBottom: 12,
-    paddingTop: 4,
+    paddingBottom: 4,
     paddingHorizontal: 22,
   },
   orderBtn: {
@@ -409,20 +365,19 @@ const styles = StyleSheet.create({
     color: "white",
     borderRadius: 8,
     flexDirection: "row",
+    minWidth: 90,
     textAlign: "center",
     gap: 8,
     paddingHorizontal: 12,
-    paddingVertical: 6
+    paddingVertical: 8
   },
   orderBtnText: {
-    fontSize: 16,
+    fontSize: 12,
     color: "white",
   },
   orderType: {
     backgroundColor: "#4dd0e2",
-    paddingTop: 12,
-    paddingBottom: 10,
-    paddingHorizontal: 10,
+    padding: 12 ,
     borderBottomWidth: 1,
     borderColor: 'black',
     flexDirection: "row",
@@ -436,29 +391,5 @@ const styles = StyleSheet.create({
     color: "white",
     paddingVertical: 4,
     paddingHorizontal: 10,
-  },
-  centeredView: {
-    flex: 1,
-    flexDirection: "column",
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: "#0000003f",
-  },
-  modalView: {
-    width: "80%",
-    gap: 15,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 25,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
 })

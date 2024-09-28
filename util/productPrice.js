@@ -40,6 +40,27 @@ export const getDollarPrice = async () => {
   return dollarPrice;
 };
 
+export const getIOCLimit = async () => {
+  let limit = 260;
+
+  try {
+    // Ensure the document reference is correct
+    const docRef = doc(db, "IOC_limit", "1");
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      let data = docSnap.data();
+      limit = parseFloat(data["limit"]);
+    } else {
+      console.error("No such document!");
+    }
+  } catch (error) {
+    console.error("Error fetching document: ", error);
+  }
+
+  return limit;
+};
+
 export const getProductsFromDB = async () => {
   try {
     let products = [];
@@ -55,6 +76,47 @@ export const getProductsFromDB = async () => {
     console.error("Error fetching products: ", error);
     const res = await fetch(serverUrl + "/assets/products.json");
     return res.json();
+  }
+};
+
+export const getShippingPrices = async () => {
+  try {
+    let rules = [];
+    const querySnapshot = await getDocs(collection(db, "shipping"));
+
+    querySnapshot.forEach((doc) => {
+      rules.push({ id: doc.id, ...doc.data() });
+    });
+
+    return rules;
+  } catch (error) {
+    return [
+      {
+        from: 2000,
+        to: 2500,
+        price: 20,
+      },
+      {
+        from: 1600,
+        to: 2000,
+        price: 40,
+      },
+      {
+        from: 1200,
+        to: 1600,
+        price: 65,
+      },
+      {
+        from: 800,
+        to: 1200,
+        price: 85,
+      },
+      {
+        from: 0,
+        to: 800,
+        price: 115,
+      },
+    ];
   }
 };
 

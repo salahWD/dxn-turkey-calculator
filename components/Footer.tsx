@@ -7,20 +7,24 @@ import { LangContext } from '../langContext';
 
 const langs = {
   ar: {
-    total_price: "السعرالكلّي",
+    free: "مجاناً",
+    total_price: "سعر الطلبية",
+    after_discount: "بعد الخصم",
     total_points: "مجموع النقاط",
     shipping: "سعر الشحن",
     products_count: "عدد المنتجات",
   },
   tr: {
-    total_price: "total price",
+    free: "free",
+    total_price: "order amount",
+    after_discount: "after discount",
     shipping: "shipping",
     total_points: "total points",
     products_count: "products count",
   }
 }
 
-export function Footer({ info: {price, shippingPrice, points, products}, togglePreviewMood }) {
+export function Footer({ info: {price, shippingPrice, points, products, discountPrice = 0}, togglePreviewMood }) {
 
   const [language, setLanguage] = useContext(LangContext);
   const [modalVisible, setModalVisible] = useState(false);
@@ -56,20 +60,15 @@ export function Footer({ info: {price, shippingPrice, points, products}, toggleP
         </View>
       </Modal>
       <View style={styles.footer}>
-        <Pressable onPress={e => togglePreviewMood()}>
-          <AntDesign style={{ ...globalStyles.cartBtn }} name="eyeo" size={24} color="black" />
-        </Pressable>
-        <View style={{ flexDirection: "row", flexGrow: 1, justifyContent: "space-evenly"}}>
-          <View style={styles.holder}>
-            <View style={{...styles.row }}>
-              <Text style={ styles.key }>{langs[language].total_price}: </Text>
-              <Text style={ styles.value }>{ price }</Text>
-            </View>
-            <View style={{...styles.row }}>
-              <Text style={ styles.key }>{langs[language].shipping}: </Text>
-              <Text style={ styles.value }>{ shippingPrice }</Text>
-            </View>
-          </View>
+        <View style={{ justifyContent: "space-between", gap: 6, }}>
+          <Pressable onPress={e => togglePreviewMood()}>
+            <AntDesign style={{ ...globalStyles.cartBtn }} name="eyeo" size={24} color="black" />
+          </Pressable>
+          <Pressable onPress={() => setModalVisible(true)}>
+            <Ionicons style={{ ...globalStyles.cartBtn }} name="language" size={24} color="black" />
+          </Pressable>
+        </View>
+        <View style={{ flexDirection: "row", flexGrow: 1, justifyContent: "space-around"}}>
           <View style={ styles.holder }>
             <View style={{...styles.row }}>
               <Text style={ styles.key }>{langs[language].total_points}: </Text>
@@ -80,10 +79,25 @@ export function Footer({ info: {price, shippingPrice, points, products}, toggleP
               <Text style={ styles.value }>{ products }</Text>
             </View>
           </View>
+          <View style={styles.holder}>
+            <View style={{...styles.row }}>
+              <Text style={ styles.key }>{langs[language].total_price}: </Text>
+              { discountPrice && discountPrice > 0 ?
+                <Text style={{ ...styles.value, textDecorationLine: "line-through", opacity: 0.55, marginBottom: 0, paddingBottom: 0 }}>{ price }</Text> :
+                <Text style={ styles.value }>{ price }</Text>}
+            </View>
+            { discountPrice && discountPrice > 0 ? (
+              <View style={{...styles.row }}>
+                <Text style={ styles.key }>{langs[language].after_discount}: </Text>
+                <Text style={ styles.value }>{ discountPrice.toFixed(2) }</Text>
+              </View>
+            ) : ""}
+            <View style={{...styles.row }}>
+              <Text style={ styles.key }>{langs[language].shipping}: </Text>
+              <Text style={ styles.value }>{ shippingPrice == 0 ? langs[language].free : shippingPrice }</Text>
+            </View>
+          </View>
         </View>
-        <Pressable onPress={() => setModalVisible(true)}>
-          <Ionicons style={{ ...globalStyles.cartBtn }} name="language" size={24} color="black" />
-        </Pressable>
       </View>
     </>
   );
@@ -91,7 +105,7 @@ export function Footer({ info: {price, shippingPrice, points, products}, toggleP
 
 const styles = StyleSheet.create({
   footer: {
-    paddingVertical: 6,
+    paddingVertical: 12,
     paddingTop: 8,
     paddingHorizontal: 20,
     flexDirection: "row",
@@ -103,9 +117,13 @@ const styles = StyleSheet.create({
   },
   holder: {
     flexDirection: "column",
+    justifyContent: "space-between",
   },
   row: {
+    flexDirection: "row-reverse",
+    gap: 6,
     alignItems: "center",
+    justifyContent: "space-between"
   },
   key: {
     color: "#444",
@@ -119,7 +137,6 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
     color: "#198691",
     fontFamily: "zain-black",
-    textAlign: "left",
   },
   centeredView: {
     flex: 1,

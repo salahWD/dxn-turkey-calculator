@@ -14,7 +14,8 @@ const langs = {
     points: "النقاط",
     price: "السعر",
     count: "العدد",
-    total_price: "النقاط السعر",
+    total_price: "مجموع النقاط",
+    price_note: "سعر الصرف لهذا الشهر",
   },
   tr: {
     selected: "selected",
@@ -23,6 +24,7 @@ const langs = {
     price: "price",
     count: "count",
     total_price: "total points",
+    price_note: "Exchange rate for this month",
   }
 }
 
@@ -32,7 +34,10 @@ export function Header({ dollarPrice }) {
 
   return (
     <View style={styles.header}>
-      <Text style={{ position: "absolute", left: 10, top: 10, opacity: .8, color: "white", fontSize: 16,  }}>{ dollarPrice }TL</Text>
+      <View style={{ position: "absolute", left: 10, top: 10 }}>
+        <Text style={{ color: "#3747ba", fontSize: 12 }}>{ dollarPrice }TL</Text>
+        <Text style={{ color: "#3747ba", fontSize: 6 }}>{ langs[language].price_note }</Text>
+      </View>
       <Text style={{...styles.row, borderLeftWidth: 0, flex: 3, }}>{langs[language].products}</Text>
       <Text style={{...styles.row, }}>{langs[language].points}</Text>
       <Text style={{...styles.row, }}>{langs[language].price}</Text>
@@ -46,7 +51,7 @@ const styles = StyleSheet.create({
   header: {
     width: '100%',
     paddingTop: 4,
-    paddingBottom: 4,
+    paddingBottom: 8,
     fontSize: 14,
     flexDirection: "row",
     backgroundColor: '#4dd0e2',

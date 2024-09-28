@@ -10,7 +10,7 @@ import { I18nManager } from "react-native";
 
 I18nManager.forceRTL(false);
 I18nManager.allowRTL(false);
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
