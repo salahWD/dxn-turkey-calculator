@@ -71,7 +71,7 @@ export default function ProductsScreen() {
       no_selected_product_title: "لا يوجد منتجات !",
       no_selected_product_desc: "لم يتم اختيار أي منتجات, يرجى اختيار بعض المنتجات قبل الإنتقال لصفحة المعلومات.",
       ioc_min_limit_title: "أقل من الحد الأدنى !",
-      ioc_min_limit_desc: "يجب ان يتعدى إجمالي سعر الطلبية الحد الأدنى لطلبات الاي او سي وهو (" + productPrice(dollarPrice, IOCLimit) + " TL) حتى تنتقل لمرحلة الطلب",
+      ioc_min_limit_desc: "يجب ان يتعدى إجمالي سعر الطلبية الحد الأدنى لطلبات الاي او سي \nوهو (" + productPrice(dollarPrice, IOCLimit) + " TL) (" + IOCLimit + "$) حتى تنتقل لمرحلة الطلب",
       discount_10: "خصم 10%",
       asp_point_limit_title: "أقل من 100 نقطة !",
       asp_point_limit_desc: "يجب ان تتعدى نقاط الطلبية المائة نقطة في نظام (ASP) كي يتم قبول الطلبية",
@@ -86,7 +86,7 @@ export default function ProductsScreen() {
       no_selected_product_title: "No products!",
       no_selected_product_desc: "No products selected, please select some products before moving to the information page.",
       ioc_min_limit_title: "Less than the minimum price limit!",
-      ioc_min_limit_desc: "The total order price must exceed the minimum IOC order amount which is (" + productPrice(dollarPrice, IOCLimit) + " TL) to proceed to the ordering stage.",
+      ioc_min_limit_desc: "The total order price must exceed the minimum IOC order amount \nwhich is (" + productPrice(dollarPrice, IOCLimit) + " TL) (" + IOCLimit + "$) to proceed to the ordering stage.",
       discount_10: "discount 10%",
       asp_point_limit_title: "Less than 100 points !",
       asp_point_limit_desc: "in ASP system, a 100 point at least is required for the order to be accepted !",
@@ -271,11 +271,19 @@ export default function ProductsScreen() {
 
   const updateFooterCalc = (i) => {
     setOrderType(i)
-    if (i == 3) {
-      setFooterInfo({...footerInfo, discountPrice: parseFloat((footerInfo.price * 0.9).toFixed(2))});
-    }else {
-      setFooterInfo({...footerInfo, discountPrice: 0});
-    }
+    setFooterItems({});
+    setFooterInfo({
+      price: 0,
+      points: 0,
+      shippingPrice: 0,
+      products: 0,
+      discountPrice: 0,
+    });
+    // if (i == 3) {
+      // setFooterInfo({...footerInfo, discountPrice: parseFloat((footerInfo.price * 0.9).toFixed(2))});
+    // }else {
+      // setFooterInfo({...footerInfo, discountPrice: 0});
+    // }
   };
 
   return (

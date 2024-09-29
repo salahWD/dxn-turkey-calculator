@@ -483,3 +483,4 @@ const styles = StyleSheet.create({
     color: '#151E26',
   },
 });
+

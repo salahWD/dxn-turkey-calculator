@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { View, Text,StyleSheet } from 'react-native';
 import { productPrice } from '../util/productPrice';
 
@@ -21,13 +21,17 @@ export type ProductProps = {
 
 export function Product({ item, calcFooter, customStyle, dollarPrice=0, selectedCount=0, disabled=false }: ProductProps) {
 
-  const [count, setCount] = useState(selectedCount);
+  const [count, setCount] = useState(0);
   const [language] = useContext(LangContext);
   
   const handleChangedText = (value) => {
     setCount(value);
     calcFooter({ id: item.id, count: value });
   }
+
+  useEffect(() => {
+    setCount(selectedCount)
+  }, [selectedCount]);
 
   return (
     <View style={{ ...styles.product, ...customStyle, backgroundColor: item?.special ? "#c7b2d9" : (count > 0 ? "#98f2a4": "#e1e4eb"), borderWidth: 0.5, borderColor: item?.special && item.special == true ? "#808080": "#cfcfcf" }}>
