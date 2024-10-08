@@ -24,6 +24,7 @@ export default function ProductsScreen() {
 
   const [language, setLanguage] = useContext(LangContext);
   const [dollarPrice, setDollarPrice] = useState(null);
+  // const [allProductsStatus, setAllProductsStatus] = useState(false);
   const [IOCLimit, setIOCLimit] = useState(null);
   const [products, setProducts] = useState([]);
   const [shippingRules, setShippingRules] = useState([]);
@@ -71,7 +72,7 @@ export default function ProductsScreen() {
       no_selected_product_title: "لا يوجد منتجات !",
       no_selected_product_desc: "لم يتم اختيار أي منتجات, يرجى اختيار بعض المنتجات قبل الإنتقال لصفحة المعلومات.",
       ioc_min_limit_title: "أقل من الحد الأدنى !",
-      ioc_min_limit_desc: "يجب ان يتعدى إجمالي سعر الطلبية الحد الأدنى لطلبات الاي او سي \nوهو (" + productPrice(dollarPrice, IOCLimit) + " TL) (" + IOCLimit + "$) حتى تنتقل لمرحلة الطلب",
+      ioc_min_limit_desc: "يجب ان يتعدى إجمالي سعر الطلبية الحد الأدنى لطلبات الاي او سي \nوهو (" + IOCLimit + " TL) حتى تنتقل لمرحلة الطلب",
       discount_10: "خصم 10%",
       asp_point_limit_title: "أقل من 100 نقطة !",
       asp_point_limit_desc: "يجب ان تتعدى نقاط الطلبية المائة نقطة في نظام (ASP) كي يتم قبول الطلبية",
@@ -86,7 +87,7 @@ export default function ProductsScreen() {
       no_selected_product_title: "No products!",
       no_selected_product_desc: "No products selected, please select some products before moving to the information page.",
       ioc_min_limit_title: "Less than the minimum price limit!",
-      ioc_min_limit_desc: "The total order price must exceed the minimum IOC order amount \nwhich is (" + productPrice(dollarPrice, IOCLimit) + " TL) (" + IOCLimit + "$) to proceed to the ordering stage.",
+      ioc_min_limit_desc: "The total order price must exceed the minimum IOC order amount \nwhich is (" + IOCLimit + " TL) to proceed to the ordering stage.",
       discount_10: "discount 10%",
       asp_point_limit_title: "Less than 100 points !",
       asp_point_limit_desc: "in ASP system, a 100 point at least is required for the order to be accepted !",
@@ -100,7 +101,7 @@ export default function ProductsScreen() {
       const selectedProds = products.filter(product => Object.keys(footerItems).includes(String(product.id)));
       if (selectedProds.length > 0) {
         if (orderType == 1) {
-          if (footerInfo.price > productPrice(dollarPrice, IOCLimit)) {
+          if (footerInfo.price > IOCLimit) {
   
             setSelectedProducts(selectedProds);
             setPreviewMood(false);
@@ -133,13 +134,24 @@ export default function ProductsScreen() {
     }
   }
 
-
   const createOrderMessage = () => {
 
     let msg = '';
     selectedProducts.forEach((product, index) => {
-      msg += `%0a المنتج: *${product.title.ar}*`;
-      msg += `%0a العدد: *${footerItems[product.id]}*`;
+      if (product?.special && product.special == 2) {
+        const packageItems = [0,1,2,3,5,8,11,12,13,16,21,22,24,25,27,28,50,49,48,44];
+        const firstPackage = products.filter(item => {
+          return packageItems.includes(item.tag);
+        })
+        msg += `%0a ـ *طلبية مجموعة*`;
+        firstPackage.forEach((item) => {
+          msg += `%0a ـ *${item.title.ar}*`;
+        })
+        msg += `%0a العدد: *1*`;
+      }else {
+        msg += `%0a المنتج: *${product.title.ar}*`;
+        msg += `%0a العدد: *${footerItems[product.id]}*`;
+      }
       if (selectedProducts.length - 1 != index) {
         msg += `%0a ـ----------------------------`;
       }
@@ -169,6 +181,7 @@ export default function ProductsScreen() {
     msg += `%0a المدينة: ${formData.city ? `*${formData.city}*` : ""}`;
     msg += `%0a العنوان: ${formData.address ? `*${formData.address}*` : ""}`;
     msg += `%0a رقم الهاتف: ${formData.phone ? `${formData.phone}` : ""}`;
+    msg += `%0a`;
     return msg;
   }
 
@@ -351,12 +364,12 @@ export default function ProductsScreen() {
                 if (Object.hasOwn(footerItems, item.id)) {
                   count = footerItems[item.id];
                 }
-                if (orderType == 0 || !(item.special != null && item.special)) {
+                if ((orderType == 0 && (item.special == null || item.special != null && item.special == 1)) || (orderType == 1 && (item.special == null || item.special != null && item.special == 2) || (orderType > 1 && item.special == null))) {
                   return (
-                    <Product calcFooter={calcFooter} dollarPrice={dollarPrice} item={item} selectedCount={count} />
+                    <Product calcFooter={calcFooter} dollarPrice={dollarPrice} item={item} selectedCount={count} /* allProductsStatus={setAllProductsStatus} disabled={allProductsStatus} */ />
                   )
                 }else {
-                  return null
+                  return null;
                 }
             }}
             />

@@ -11,7 +11,7 @@ const langs = {
   ar: {
     selected: "تحديد",
     products: "المنتجات",
-    points: "النقاط",
+    points: "PV",
     price: "السعر",
     count: "العدد",
     total_price: "مجموع النقاط",
@@ -20,10 +20,10 @@ const langs = {
   tr: {
     selected: "selected",
     products: "products",
-    points: "points",
+    points: "PV",
     price: "price",
     count: "count",
-    total_price: "total points",
+    total_price: "total PV",
     price_note: "Exchange rate for this month",
   }
 }
@@ -50,6 +50,7 @@ export function Header({ dollarPrice }) {
 const styles = StyleSheet.create({
   header: {
     width: '100%',
+    minHeight: 40,
     paddingTop: 4,
     paddingBottom: 8,
     fontSize: 14,
