@@ -1,4 +1,4 @@
-import { useEffect, useContext } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { Text, TextInput, View, StyleSheet } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -298,7 +298,7 @@ const langs = {
 
 export function InfoBar({ info: {price, shippingPrice, points, products, discountPrice}, formInfo }) {
 
-  const [language, setLanguage] = useContext(LangContext);
+  const { language, setLanguage } = useContext(LangContext);
   const [formData, setFormData] = formInfo;
 
   useEffect(() => {

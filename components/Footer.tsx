@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { Text, View, StyleSheet, Pressable, Modal } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -26,14 +26,16 @@ const langs = {
 
 export function Footer({ info: {price, shippingPrice, points, products, discountPrice = 0}, togglePreviewMood }) {
 
-  const [language, setLanguage] = useContext(LangContext);
+  const { language, setLanguage } = useContext(LangContext);
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleLangModal = (lang) => {
+    console.log(lang);
     setLanguage(lang);
+    console.log(language);
     setModalVisible(false);
   };
-
+  
   return (
     <>
       <Modal
@@ -72,7 +74,7 @@ export function Footer({ info: {price, shippingPrice, points, products, discount
           <View style={ styles.holder }>
             <View style={{...styles.row }}>
               <Text style={ styles.key }>{langs[language].total_points}: </Text>
-              <Text style={ styles.value }>{ points }</Text>
+              <Text style={ styles.value }>{ points.toFixed(2) }</Text>
             </View>
             <View style={{...styles.row }}>
               <Text style={ styles.key }>{langs[language].products_count}: </Text>
@@ -84,7 +86,7 @@ export function Footer({ info: {price, shippingPrice, points, products, discount
               <Text style={ styles.key }>{langs[language].total_price}: </Text>
               { discountPrice && discountPrice > 0 ?
                 <Text style={{ ...styles.value, textDecorationLine: "line-through", opacity: 0.55, marginBottom: 0, paddingBottom: 0 }}>{ price }</Text> :
-                <Text style={ styles.value }>{ price }</Text>}
+                <Text style={ styles.value }>{ price.toFixed(2) }</Text>}
             </View>
             { discountPrice && discountPrice > 0 ? (
               <View style={{...styles.row }}>
@@ -94,7 +96,7 @@ export function Footer({ info: {price, shippingPrice, points, products, discount
             ) : ""}
             <View style={{...styles.row }}>
               <Text style={ styles.key }>{langs[language].shipping}: </Text>
-              <Text style={ styles.value }>{ shippingPrice == 0 ? langs[language].free : shippingPrice }</Text>
+              <Text style={ styles.value }>{ (shippingPrice == 0 || !shippingPrice) ? langs[language].free : shippingPrice }</Text>
             </View>
           </View>
         </View>

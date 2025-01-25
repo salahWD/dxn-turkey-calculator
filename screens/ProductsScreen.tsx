@@ -1,4 +1,4 @@
-import React, { useEffect, useContext, useState, useRef, MutableRefObject } from "react";
+import React, { useEffect, useContext, useState } from "react";
 import { Alert, ScrollView, FlatList, StatusBar, StyleSheet, View, Text, Pressable, Linking, Modal } from "react-native";
 
 import { globalStyles } from "../constants/global";
@@ -15,24 +15,19 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Entypo from '@expo/vector-icons/Entypo';
 
-import ViewShot, { captureRef } from 'react-native-view-shot';
-import * as Sharing from 'expo-sharing';
-
 export default function ProductsScreen() {
 
-  const imageRef: null | MutableRefObject<any> = useRef(null);
-
-  const [language, setLanguage] = useContext(LangContext);
+  const { language, setLanguage } = useContext(LangContext);
   const [dollarPrice, setDollarPrice] = useState(null);
-  // const [allProductsStatus, setAllProductsStatus] = useState(false);
   const [IOCLimit, setIOCLimit] = useState(null);
   const [products, setProducts] = useState([]);
   const [shippingRules, setShippingRules] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [footerItems, setFooterItems] = useState({});
-  const [footerInfo, setFooterInfo] = useState({price: 0, points: 0, shippingPrice: 110, products: 0, discountPrice: 0});
+  const [footerInfo, setFooterInfo] = useState({price: 0, points: 0, shippingPrice: 0, products: 0, discountPrice: 0});
   const [previewMood, setPreviewMood] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [discountAlertVisible, setDiscountAlertVisible] = useState(false);
   const [formData, setFormData] = useState({
     phone: null,
     membership: null,
@@ -47,7 +42,14 @@ export default function ProductsScreen() {
 
     const fetchDBInfo = async () => {
       const res = await getProductsFromDB();
-      setProducts(res);
+      setProducts(res.sort((a, b) => {
+        // Prioritize items with special = 1 or 2
+        if ((a.special === 1 || a.special === 2) && (!b.special || b.special === 0)) return -1;
+        if ((b.special === 1 || b.special === 2) && (!a.special || a.special === 0)) return 1;
+        
+        // If both have special status, sort by tag
+        return (a.tag || 0) - (b.tag || 0);
+      }));
 
       setShippingRules(await getShippingPrices());
 
@@ -76,6 +78,8 @@ export default function ProductsScreen() {
       discount_10: "خصم 10%",
       asp_point_limit_title: "أقل من 100 نقطة !",
       asp_point_limit_desc: "يجب ان تتعدى نقاط الطلبية المائة نقطة في نظام (ASP) كي يتم قبول الطلبية",
+      alert: "تنبيه",
+      discountAlert: "يرجى التأكد من تفعيلكم لنظام (ASP) او (DSP ) قبل تقديم طلب خصم 10 بالمية",
       normal_system: "النظام العادي",
       alert_btn: "حسناً",
     },
@@ -91,6 +95,8 @@ export default function ProductsScreen() {
       discount_10: "discount 10%",
       asp_point_limit_title: "Less than 100 points !",
       asp_point_limit_desc: "in ASP system, a 100 point at least is required for the order to be accepted !",
+      alert: "Alert",
+      discountAlert: "make sure you have Active ASP balance before making an ASP discount order !",
       normal_system: "normal",
       alert_btn: "Ok",
     }
@@ -151,6 +157,7 @@ export default function ProductsScreen() {
       }else {
         msg += `%0a المنتج: *${product.title.ar}*`;
         msg += `%0a العدد: *${footerItems[product.id]}*`;
+        msg += `%0a الكود: *${product?.code || "######"}*`;
       }
       if (selectedProducts.length - 1 != index) {
         msg += `%0a ـ----------------------------`;
@@ -175,12 +182,12 @@ export default function ProductsScreen() {
     msg += `%0a إجمالي النقاط: *${footerInfo.points}*`;
     msg += `%0a عدد المنتجات: *${footerInfo.products}*`;
     msg += `%0a *ـ=================*`;
-    msg += `%0a الاسم: ${formData.name ? `*${formData.name}*` : ""}`;
-    msg += `%0a رقم العضوية: ${formData.membership ? `${formData.membership}` : ""}`;
-    msg += `%0a اسم المستلم: ${formData.recipient ? `*${formData.recipient}*` : ""}`;
-    msg += `%0a المدينة: ${formData.city ? `*${formData.city}*` : ""}`;
-    msg += `%0a العنوان: ${formData.address ? `*${formData.address}*` : ""}`;
-    msg += `%0a رقم الهاتف: ${formData.phone ? `${formData.phone}` : ""}`;
+    msg += `%0a الاسم: ${formData.name.trim() ? `*${formData.name.trim()}*` : ""}`;
+    msg += `%0a رقم العضوية: ${formData.membership.trim() ? `${formData.membership.trim()}` : ""}`;
+    msg += `%0a اسم المستلم: ${formData.recipient.trim() ? `*${formData.recipient.trim()}*` : ""}`;
+    msg += `%0a المدينة: ${formData.city.trim() ? `*${formData.city.trim()}*` : ""}`;
+    msg += `%0a العنوان: ${formData.address.trim() ? `*${formData.address.trim()}*` : ""}`;
+    msg += `%0a رقم الهاتف: ${formData.phone.trim() ? `${formData.phone.trim()}` : ""}`;
     msg += `%0a`;
     return msg;
   }
@@ -206,6 +213,10 @@ export default function ProductsScreen() {
       }
     })
 
+    if (orderType == 3) {
+      price = price * 0.9;
+    }
+    
     let shippingPrice = 0;
     shippingRules.forEach(rule => {
       if (price > rule.from && price <= rule.to ) {
@@ -219,7 +230,7 @@ export default function ProductsScreen() {
         points: parseFloat(points.toFixed(2)),
         shippingPrice: shippingPrice,
         products: totalProducts,
-        discountPrice: parseFloat((price * 0.9).toFixed(2)),
+        discountPrice: parseFloat((price).toFixed(2)),
       });
     }else {
       setFooterInfo({
@@ -264,25 +275,10 @@ export default function ProductsScreen() {
 
   }
 
-  const onSaveImageAsync = async (willReturn=false) => {
-    await saveInputs();
-    try {
-
-      const imageUri = await captureRef(imageRef, {
-        format: "png",
-        quality: 0.9,
-      });
-      if (willReturn) {
-        return imageUri;
-      }
-      await Sharing.shareAsync(imageUri, { mimeType: 'image/png', dialogTitle: "loog at this" });
-
-    } catch (e) {
-      console.error("Error in onsaveimageasync function: ", e);
-    }
-  };
-
   const updateFooterCalc = (i) => {
+    if (i == 3) {
+      setDiscountAlertVisible(true);
+    }
     setOrderType(i)
     setFooterItems({});
     setFooterInfo({
@@ -292,11 +288,6 @@ export default function ProductsScreen() {
       products: 0,
       discountPrice: 0,
     });
-    // if (i == 3) {
-      // setFooterInfo({...footerInfo, discountPrice: parseFloat((footerInfo.price * 0.9).toFixed(2))});
-    // }else {
-      // setFooterInfo({...footerInfo, discountPrice: 0});
-    // }
   };
 
   return (
@@ -323,6 +314,25 @@ export default function ProductsScreen() {
                     <Text style={{ ...styles.orderBtnText }}>{langs[language].taksim}</Text>
                   </View>
                 </Pressable>
+              </View>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Modal>
+      <Modal
+        statusBarTranslucent
+        animationType="slide"
+        transparent={true}
+        visible={discountAlertVisible}
+        onRequestClose={() => {
+          setDiscountAlertVisible(false);
+        }}>
+        <Pressable style={{ flex: 1, }} onPress={() => setDiscountAlertVisible(false)}>
+          <View style={styles.centeredView}>
+            <Pressable style={{ width: 350, alignItems: "center", justifyContent: "center" }} onPress={(e) => e.stopPropagation()}>
+              <View style={styles.modalView}>
+                <Text style={styles.alertTitle}>{langs[language].alert}</Text>
+                <Text style={{ ...styles.alertText, textAlign: language == "ar" ? "right": "left" }}>{langs[language].discountAlert}</Text>
               </View>
             </Pressable>
           </View>
@@ -366,7 +376,7 @@ export default function ProductsScreen() {
                 }
                 if ((orderType == 0 && (item.special == null || item.special != null && item.special == 1)) || (orderType == 1 && (item.special == null || item.special != null && item.special == 2) || (orderType > 1 && item.special == null))) {
                   return (
-                    <Product calcFooter={calcFooter} dollarPrice={dollarPrice} item={item} selectedCount={count} /* allProductsStatus={setAllProductsStatus} disabled={allProductsStatus} */ />
+                    <Product stopped={item?.stopped} calcFooter={calcFooter} dollarPrice={dollarPrice} item={item} selectedCount={count} />
                   )
                 }else {
                   return null;
@@ -377,7 +387,7 @@ export default function ProductsScreen() {
         </>}
         {!previewMood && 
           <ScrollView style={{ flex: 1, backgroundColor: "#defafc"}} contentContainerStyle={{ minHeight: "100%"}}>
-            <ViewShot ref={imageRef} style={{ flex: 1, backgroundColor: "#defafc" }} options={{ format: "png", quality: 1 }}>
+            <View style={{ flex: 1, backgroundColor: "#defafc" }}>
               <Header key="header" dollarPrice={dollarPrice} />
               <View style={{ flex: 1 }}>
                 {selectedProducts.map(item => {
@@ -386,12 +396,12 @@ export default function ProductsScreen() {
                     count = footerItems[item.id];
                   }
                   return (
-                    <Product key={item.id} disabled={true} dollarPrice={dollarPrice} calcFooter={calcFooter} item={item} selectedCount={count} />
+                    <Product key={item.id} disabled={true} stopped={item?.stopped} dollarPrice={dollarPrice} calcFooter={calcFooter} item={item} selectedCount={count} />
                   )
                 })}
               </View>
               <InfoBar info={footerInfo} formInfo={[formData, setFormData]} />
-            </ViewShot>
+            </View>
           <View style={styles.actionsBox}>
             <Pressable onPress={togglePreviewMood}>
               <Entypo style={globalStyles.cartBtn} name="back" size={24} color="black" />
@@ -403,9 +413,6 @@ export default function ProductsScreen() {
                 </View>
               </Pressable>
             </View>
-            <Pressable onPress={() => {onSaveImageAsync()}}>
-              <AntDesign style={{ ...globalStyles.cartBtn, backgroundColor: "#3dcc5a", color: "#dcfadc"}} name="camerao" size={24} color="black" />
-            </Pressable>
           </View>
           </ScrollView>
         }
@@ -438,6 +445,14 @@ const styles = StyleSheet.create({
   orderBtnText: {
     fontSize: 16,
     color: "white",
+  },
+  alertText: {
+    fontSize: 18,
+    color: "black",
+  },
+  alertTitle: {
+    fontSize: 26,
+    color: "#C30000",
   },
   orderType: {
     backgroundColor: "#4dd0e2",

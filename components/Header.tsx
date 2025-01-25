@@ -30,7 +30,7 @@ const langs = {
 
 export function Header({ dollarPrice }) {
 
-  const [language, setLanguage] = useContext(LangContext);
+  const { language, setLanguage } = useContext(LangContext);
 
   return (
     <View style={styles.header}>

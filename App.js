@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { View } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Dimensions, Text } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
 import ProductsScreen from "./screens/ProductsScreen";
 import { LangContext } from "./langContext.ts";
+import * as ScreenOrientation from "expo-screen-orientation";
 
 import { I18nManager } from "react-native";
 
@@ -14,7 +14,7 @@ I18nManager.allowRTL(false);
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  const [lang, setLang] = useState("ar");
+  const [language, setLanguage] = useState("ar");
 
   const [loaded] = useFonts({
     "zain-black": require("./assets/fonts/Zain-Black.ttf"),
@@ -29,12 +29,20 @@ export default function App() {
     }
   }, [loaded]);
 
+  useEffect(() => {
+    ScreenOrientation.unlockAsync();
+
+    return () => {
+      ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.DEFAULT);
+    };
+  }, []);
+
   if (!loaded) {
     return null;
   }
 
   return (
-    <LangContext.Provider value={[lang, setLang]}>
+    <LangContext.Provider value={{ language, setLanguage }}>
       <View style={{ backgroundColor: "#e9fbf1", flex: 1 }}>
         <ProductsScreen />
       </View>

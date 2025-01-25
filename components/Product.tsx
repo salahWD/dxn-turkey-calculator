@@ -16,19 +16,15 @@ export type ProductProps = {
   selectedCount?: number,
   customStyle?: {},
   disabled?: boolean,
-  // allProductsStatus?: Function,
+  stopped?: boolean,
 };
 
-export function Product({ item, calcFooter, customStyle, dollarPrice=0, selectedCount=0, disabled=false/* , allProductsStatus=null */ }: ProductProps) {
+export function Product({ item, calcFooter, customStyle, dollarPrice=0, selectedCount=0, disabled=false, stopped=false }: ProductProps) {
   
   const [count, setCount] = useState(0);
-  // const [status, setStatus] = useState(disabled);
-  const [language] = useContext(LangContext);
+  const { language } = useContext(LangContext) || {};
   
   const handleChangedText = (value) => {
-    // if (item?.special && item.special == 2) {
-    //   allProductsStatus(value);
-    // }
     setCount(value);
     calcFooter({ id: item.id, count: value });
   }
@@ -37,13 +33,8 @@ export function Product({ item, calcFooter, customStyle, dollarPrice=0, selected
     setCount(selectedCount)
   }, [selectedCount]);
 
-  // useEffect(() => {
-  //   setStatus(disabled)
-  //   console.log("wawa", disabled)
-  // }, [disabled]);
-
   return (
-    <View style={{ ...styles.product, ...customStyle, backgroundColor: item?.special ? "#c7b2d9" : (count > 0 ? "#98f2a4": "#e1e4eb"), borderWidth: 0.5, borderColor: item?.special ? "#808080": "#cfcfcf" }}>
+    <View style={{ ...styles.product, ...customStyle, backgroundColor: item?.special ? "#c7b2d9" : (stopped ? "#F88379": (count > 0 ? "#98f2a4": "#e1e4eb")), borderWidth: 0.5, borderColor: item?.special ? "#808080": "#cfcfcf" }}>
       <View style={{ ...styles.cell, borderLeftWidth: 0, flex: 3, borderColor: item?.special ? "#808080": "#cfcfcf" }}>
         <Text style={styles.text}>{item.title[language]}</Text>
       </View>
@@ -57,8 +48,7 @@ export function Product({ item, calcFooter, customStyle, dollarPrice=0, selected
         <SelectDropdown
           statusBarTranslucent={true}
           defaultValue={selectedCount}
-          // disabled={status}
-          disabled={disabled}
+          disabled={disabled || stopped}
           data={productCountList}
           onSelect={(selectedItem, index) => {
             handleChangedText(selectedItem)
@@ -130,12 +120,11 @@ const styles = StyleSheet.create({
   },
 
   dropdownButtonStyle: {
-    width: "100%",
+    width: "80%",
     height: 22,
     backgroundColor: '#F5F5F5',
     borderRadius: 4,
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
   },
   dropdownButtonTxtStyle: {
@@ -151,13 +140,12 @@ const styles = StyleSheet.create({
   },
   dropdownMenuStyle: {
     backgroundColor: 'white',
-    // backgroundColor: 'red',
     borderRadius: 8,
   },
   dropdownItemStyle: {
     width: '100%',
     flexDirection: 'row',
-    paddingHorizontal: 12,
+    paddingHorizontal: 4,
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 2,

@@ -1,8 +1,11 @@
-import { createContext } from "react"
+import React, { createContext } from "react"
 
 export type LanguageContextType = {
   language: "ar" | "tr";
-  setLanguage: (language: string) => void;
+  setLanguage: (language: "ar" | "tr") => void;
 };
 
-export const LangContext = createContext<LanguageContextType | undefined>({language: "ar", setLanguage: () => {}});
+export const LangContext = createContext<LanguageContextType>({
+  language: "ar",
+  setLanguage: () => {}
+});

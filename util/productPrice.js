@@ -21,7 +21,7 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
 export const getDollarPrice = async () => {
-  let dollarPrice = 32;
+  let dollarPrice = 35;
 
   try {
     // Ensure the document reference is correct
