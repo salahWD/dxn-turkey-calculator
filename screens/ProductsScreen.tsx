@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from "react";
-import { Alert, ScrollView, FlatList, StatusBar, StyleSheet, View, Text, Pressable, Linking, Modal } from "react-native";
+import { BackHandler, Alert, ScrollView, FlatList, StatusBar, StyleSheet, View, Text, Pressable, Linking, Modal } from "react-native";
 
 import { globalStyles } from "../constants/global";
 import { productPrice, getDollarPrice, getShippingPrices, getProductsFromDB, getIOCLimit } from '../util/productPrice';
@@ -11,7 +11,6 @@ import { InfoBar } from "../components/InfoBar";
 
 import { LangContext } from "../langContext";
 
-import AntDesign from '@expo/vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Entypo from '@expo/vector-icons/Entypo';
 
@@ -62,6 +61,18 @@ export default function ProductsScreen() {
     }
 
     fetchDBInfo();
+    
+    const backAction = () => {
+      setPreviewMood(true);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      backAction
+    );
+  
+    return () => backHandler.remove();
 
   }, []);
 
@@ -155,9 +166,10 @@ export default function ProductsScreen() {
         })
         msg += `%0a العدد: *1*`;
       }else {
-        msg += `%0a المنتج: *${product.title.ar}*`;
+        console.log("first")
+        msg += `%0a المنتج: *${product.title.ar.replace("+", " %2b ")}*`;
         msg += `%0a العدد: *${footerItems[product.id]}*`;
-        msg += `%0a الكود: *${product?.code || "######"}*`;
+        msg += `%0a الكود: *${product?.code ?? "- - -"}*`;
       }
       if (selectedProducts.length - 1 != index) {
         msg += `%0a ـ----------------------------`;
@@ -182,13 +194,15 @@ export default function ProductsScreen() {
     msg += `%0a إجمالي النقاط: *${footerInfo.points}*`;
     msg += `%0a عدد المنتجات: *${footerInfo.products}*`;
     msg += `%0a *ـ=================*`;
-    msg += `%0a الاسم: ${formData.name.trim() ? `*${formData.name.trim()}*` : ""}`;
-    msg += `%0a رقم العضوية: ${formData.membership.trim() ? `${formData.membership.trim()}` : ""}`;
-    msg += `%0a اسم المستلم: ${formData.recipient.trim() ? `*${formData.recipient.trim()}*` : ""}`;
-    msg += `%0a المدينة: ${formData.city.trim() ? `*${formData.city.trim()}*` : ""}`;
-    msg += `%0a العنوان: ${formData.address.trim() ? `*${formData.address.trim()}*` : ""}`;
-    msg += `%0a رقم الهاتف: ${formData.phone.trim() ? `${formData.phone.trim()}` : ""}`;
+    msg += `%0a الاسم: ${formData.name?.trim() ? `*${formData.name?.trim()}*` : ""}`;
+    msg += `%0a رقم العضوية: ${formData.membership?.trim() ? `${formData.membership?.trim()}` : ""}`;
+    msg += `%0a اسم المستلم: ${formData.recipient?.trim() ? `*${formData.recipient?.trim()}*` : ""}`;
+    msg += `%0a المدينة: ${formData.city?.trim() ? `*${formData.city?.trim()}*` : ""}`;
+    msg += `%0a العنوان: ${formData.address?.trim() ? `*${formData.address?.trim()}*` : ""}`;
+    msg += `%0a رقم الهاتف: ${formData.phone?.trim() ? `${formData.phone?.trim()}` : ""}`;
     msg += `%0a`;
+
+    console.log(msg)
     return msg;
   }
 
@@ -247,7 +261,7 @@ export default function ProductsScreen() {
     try {
       await AsyncStorage.setItem('@form', JSON.stringify(formData));
     } catch (e) {
-      console.error('Failed to save inputs:', e);
+      console.log('Failed to save inputs:', e);
     }
   }
 
@@ -255,20 +269,20 @@ export default function ProductsScreen() {
     await saveInputs();
 
     let url = '';
-
-    if (branch == 1) {// taksim branch
-      url = "whatsapp://send?phone=905528666050&text=" + createOrderMessage();
-      // url = "whatsapp://send?phone=905527188570&text=" + createOrderMessage();
-    }else {// essenyurt branch
-      // url = "whatsapp://send?phone=905527188570&text=" + createOrderMessage();
-      url = "whatsapp://send?phone=905444482988&text=" + createOrderMessage();
-    }
     
     try {
-      Linking.openURL(url).catch(() => {
+      if (branch == 1) {// taksim branch
+        url = "whatsapp://send?phone=905528666050&text=" + createOrderMessage();
+      }else {// essenyurt branch
+        url = "whatsapp://send?phone=905444482988&text=" + createOrderMessage();
+      }
+      
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
         alert('Make sure WhatsApp is installed on your device');
-      });
-
+      }
     } catch (error) {
       console.error('Error =>', error);
     }
@@ -419,7 +433,6 @@ export default function ProductsScreen() {
       </View>
     </>
   );
-
 }
 
 const styles = StyleSheet.create({

@@ -35,7 +35,7 @@ export function Header({ dollarPrice }) {
   return (
     <View style={styles.header}>
       <View style={{ position: "absolute", left: 10, top: 10 }}>
-        <Text style={{ color: "#3747ba", fontSize: 12 }}>{ dollarPrice }TL</Text>
+        <Text style={{ color: "#3747ba", fontSize: 12 }}>{ dollarPrice ? dollarPrice?.toFixed(2) : "00" }TL</Text>
         <Text style={{ color: "#3747ba", fontSize: 6 }}>{ langs[language].price_note }</Text>
       </View>
       <Text style={{...styles.row, borderLeftWidth: 0, flex: 3, }}>{langs[language].products}</Text>

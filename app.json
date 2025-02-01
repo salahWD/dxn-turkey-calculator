@@ -1,8 +1,8 @@
 {
-  "versionCode": 2.1,
+  "versionCode": 5,
   "name": "حاسبة DXN التركية",
   "slug": "hasbh-dxn-ballyrh-altrkyh",
-  "version": "2.1.0",
+  "version": "2.3.0",
   "orientation": "default",
   "icon": "./assets/icon.png",
   "userInterfaceStyle": "light",
@@ -26,8 +26,8 @@
     },
     "permissions": [],
     "package": "test.salatemps.hasbhdxnballyrhaltrkyh",
-    "runtimeVersion": "2.1.0",
-    "versionCode": "2.1"
+    "runtimeVersion": "2.3.0",
+    "versionCode": "5"
   },
   "web": {
     "favicon": "./assets/favicon.png"

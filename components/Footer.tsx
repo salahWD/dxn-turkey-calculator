@@ -30,9 +30,7 @@ export function Footer({ info: {price, shippingPrice, points, products, discount
   const [modalVisible, setModalVisible] = useState(false);
 
   const handleLangModal = (lang) => {
-    console.log(lang);
     setLanguage(lang);
-    console.log(language);
     setModalVisible(false);
   };
   
