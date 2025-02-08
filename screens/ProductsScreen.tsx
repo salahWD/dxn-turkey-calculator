@@ -9,12 +9,16 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 import { InfoBar } from "../components/InfoBar";
 
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { LangContext } from "../langContext";
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Entypo from '@expo/vector-icons/Entypo';
 
 export default function ProductsScreen() {
+  
+  const insets = useSafeAreaInsets();
 
   const { language, setLanguage } = useContext(LangContext);
   const [dollarPrice, setDollarPrice] = useState(null);
@@ -352,7 +356,7 @@ export default function ProductsScreen() {
           </View>
         </Pressable>
       </Modal>
-      <View style={{ backgroundColor: "#e9fbf1", flex: 1 }}>
+      <View style={{ backgroundColor: "#e9fbf1", flex: 1, paddingBottom: insets.bottom, paddingTop: insets.top }}>
         <StatusBar hidden={true} translucent/>
         {previewMood && <>
             <View style={ styles.orderType } >

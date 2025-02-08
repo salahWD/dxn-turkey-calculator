@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, Dimensions, Text } from "react-native";
+import { View, I18nManager } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import ProductsScreen from "./screens/ProductsScreen";
-import { LangContext } from "./langContext.ts";
+import { LangContext } from "./langContext";
 import * as ScreenOrientation from "expo-screen-orientation";
-
-import { I18nManager } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 I18nManager.forceRTL(false);
 I18nManager.allowRTL(false);
@@ -42,10 +41,12 @@ export default function App() {
   }
 
   return (
-    <LangContext.Provider value={{ language, setLanguage }}>
-      <View style={{ backgroundColor: "#e9fbf1", flex: 1 }}>
-        <ProductsScreen />
-      </View>
-    </LangContext.Provider>
+    <SafeAreaProvider>
+      <LangContext.Provider value={{ language, setLanguage }}>
+        <View style={{ backgroundColor: "#e9fbf1", flex: 1 }}>
+          <ProductsScreen />
+        </View>
+      </LangContext.Provider>
+    </SafeAreaProvider>
   );
 }
