@@ -221,6 +221,7 @@ export default function ProductsScreen() {
     setFooterItems(items);
 
     let price = 0;
+    let shipingValue = 0;
     let points = 0;
     let totalProducts = 0;
     products.filter(product => Object.keys(items).includes(String(product.id))).forEach(item => {
@@ -232,12 +233,12 @@ export default function ProductsScreen() {
     })
 
     if (orderType == 3) {
-      price = price * 0.9;
+      shipingValue = price * 0.9;
     }
     
     let shippingPrice = 0;
     shippingRules.forEach(rule => {
-      if (price > rule.from && price <= rule.to ) {
+      if (shipingValue > rule.from && shipingValue <= rule.to ) {
         shippingPrice = rule.price;
       }
     })
@@ -248,7 +249,7 @@ export default function ProductsScreen() {
         points: parseFloat(points.toFixed(2)),
         shippingPrice: shippingPrice,
         products: totalProducts,
-        discountPrice: parseFloat((price).toFixed(2)),
+        discountPrice: parseFloat((price * 0.9).toFixed(2)),
       });
     }else {
       setFooterInfo({
