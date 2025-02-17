@@ -170,7 +170,6 @@ export default function ProductsScreen() {
         })
         msg += `%0a العدد: *1*`;
       }else {
-        console.log("first")
         msg += `%0a المنتج: *${product.title.ar.replace("+", " %2b ")}*`;
         msg += `%0a العدد: *${footerItems[product.id]}*`;
         msg += `%0a الكود: *${product?.code ?? "- - -"}*`;
@@ -206,7 +205,6 @@ export default function ProductsScreen() {
     msg += `%0a رقم الهاتف: ${formData.phone?.trim() ? `${formData.phone?.trim()}` : ""}`;
     msg += `%0a`;
 
-    console.log(msg)
     return msg;
   }
 
@@ -238,7 +236,7 @@ export default function ProductsScreen() {
     
     let shippingPrice = 0;
     shippingRules.forEach(rule => {
-      if (shipingValue > rule.from && shipingValue <= rule.to ) {
+      if (price > rule.from && price <= rule.to ) {
         shippingPrice = rule.price;
       }
     })
