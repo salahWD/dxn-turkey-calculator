@@ -1,11 +1,18 @@
-import React, { useEffect, useContext } from 'react';
-import { Text, TextInput, View, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { useEffect, useContext } from "react";
+import {
+  Text,
+  TextInput,
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  ScrollView,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { LangContext } from '../langContext';
+import { LangContext } from "../langContext";
 
-import SelectDropdown from 'react-native-select-dropdown'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import SelectDropdown from "react-native-select-dropdown";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const citiesList = [
   "Istanbul",
@@ -273,12 +280,12 @@ const langs = {
     total_points: "مجموع النقاط",
     shipping: "سعر الشحن",
     products_count: "عدد المنتجات",
-    cityPlaceholder: 'المدينة',
-    phonePlaceholder: 'رقم الهاتف',
-    memberNamePlaceholder: 'إسم العضو',
-    membershipNumberPlaceholder: 'رقم العضوية',
-    namePlaceholder: 'إسم المستلم',
-    addressPlaceholder: 'العنوان',
+    cityPlaceholder: "المدينة",
+    phonePlaceholder: "رقم الهاتف",
+    memberNamePlaceholder: "إسم العضو",
+    membershipNumberPlaceholder: "رقم العضوية",
+    namePlaceholder: "إسم المستلم",
+    addressPlaceholder: "العنوان",
   },
   tr: {
     free: "free",
@@ -287,29 +294,31 @@ const langs = {
     shipping: "shipping",
     total_points: "total points",
     products_count: "products count",
-    cityPlaceholder: 'City',
-    phonePlaceholder: 'Phone',
-    memberNamePlaceholder: 'member name',
-    membershipNumberPlaceholder: 'membership',
-    namePlaceholder: 'recipient name',
-    addressPlaceholder: 'address',
-  }
-}
+    cityPlaceholder: "City",
+    phonePlaceholder: "Phone",
+    memberNamePlaceholder: "member name",
+    membershipNumberPlaceholder: "membership",
+    namePlaceholder: "recipient name",
+    addressPlaceholder: "address",
+  },
+};
 
-export function InfoBar({ info: {price, shippingPrice, points, products, discountPrice}, formInfo }) {
-
-  const { language, setLanguage } = useContext(LangContext);
+export function InfoBar({
+  info: { price, shippingPrice, points, products, discountPrice },
+  formInfo,
+}) {
+  const { language } = useContext(LangContext);
   const [formData, setFormData] = formInfo;
 
   useEffect(() => {
     const loadInputs = async () => {
       try {
-        const form = JSON.parse(await AsyncStorage.getItem('@form'));
+        const form = JSON.parse(await AsyncStorage.getItem("@form"));
         if (form !== null) {
-          setFormData({...formData, ...form});
+          setFormData({ ...formData, ...form });
         }
       } catch (e) {
-        console.error('Failed to load inputs:', e);
+        console.error("Failed to load inputs:", e);
       }
     };
 
@@ -318,80 +327,163 @@ export function InfoBar({ info: {price, shippingPrice, points, products, discoun
 
   return (
     <>
-      <View style={styles.main}>
-        <View style={styles.footer}>
-          <View style={styles.container}>
-            <View style={styles.inputRow}>
-              <TextInput onChangeText={(e) => {setFormData({...formData, name: e})}} value={formData.name} style={styles.textInput} placeholder={langs[language].memberNamePlaceholder} />
-              <TextInput onChangeText={(e) => {setFormData({...formData, membership: e})}} value={formData.membership} inputMode='numeric' style={styles.textInput} placeholder={langs[language].membershipNumberPlaceholder} />
-            </View>
-            <View style={styles.inputRow}>
-              <TextInput onChangeText={(e) => {setFormData({...formData, phone: e})}} value={formData.phone} inputMode='numeric' style={{ ...styles.textInput, }} placeholder={langs[language].phonePlaceholder} />
-              <SelectDropdown
-                defaultValue={formData.city}
-                data={citiesList}
-                onSelect={(selectedItem, index) => {
-                  setFormData({...formData, city: selectedItem})
-                }}
-                renderButton={(selectedItem, isOpened) => {
-                  return (
-                    <View style={styles.dropdownButtonStyle}>
-                      <Text style={selectedItem != null ? {color: "#333"} : styles.dropdownButtonTxtStyle}>
-                        {(selectedItem != null && selectedItem) || langs[language].cityPlaceholder}
-                      </Text>
-                      <Icon name={isOpened ? 'chevron-up' : 'chevron-down'} style={styles.dropdownButtonArrowStyle} />
-                    </View>
-                  );
-                }}
-                renderItem={(item, index, isSelected) => {
-                  return (
-                    <View style={{...styles.dropdownItemStyle, ...(isSelected && {backgroundColor: '#E9ECEF'})}}>
-                      <Text style={styles.dropdownItemTxtStyle}>{item}</Text>
-                    </View>
-                  );
-                }}
-                showsVerticalScrollIndicator={false}
-                dropdownStyle={styles.dropdownMenuStyle}
-              />
-            </View>
-            <View style={styles.inputRow}>
-              <TextInput onChangeText={(e) => {setFormData({...formData, recipient: e})}} value={formData.recipient} style={styles.textInput} placeholder={langs[language].namePlaceholder} />
-              <TextInput onChangeText={(e) => {setFormData({...formData, address: e})}} value={formData.address} style={styles.textInput} placeholder={langs[language].addressPlaceholder} />
-            </View>
-          </View>
-          <View style={styles.holder}>
-            <View style={{...styles.row }}>
-              <Text style={ discountPrice && discountPrice > 0 ? {...styles.value, textDecorationLine: "line-through", opacity: 0.55} : {...styles.value}}>{ price.toFixed(2) }</Text>
-              <Text style={styles.key}>{langs[language].total_price}: </Text>
-            </View>
-            {discountPrice && discountPrice > 0 ? (
-              <View style={{...styles.row }}>
-                <Text style={styles.value}>{ discountPrice.toFixed(2) }</Text>
-                <Text style={styles.key}>{langs[language].after_discount}: </Text>
+      <KeyboardAvoidingView behavior={"padding"}>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="always"
+        >
+          <View style={styles.main}>
+            <View style={styles.footer}>
+              <View style={styles.container}>
+                <View style={styles.inputRow}>
+                  <TextInput
+                    onChangeText={(e) => {
+                      setFormData({ ...formData, name: e });
+                    }}
+                    value={formData.name}
+                    style={styles.textInput}
+                    placeholder={langs[language].memberNamePlaceholder}
+                  />
+                  <TextInput
+                    onChangeText={(e) => {
+                      setFormData({ ...formData, membership: e });
+                    }}
+                    value={formData.membership}
+                    inputMode="numeric"
+                    style={styles.textInput}
+                    placeholder={langs[language].membershipNumberPlaceholder}
+                  />
+                </View>
+                <View style={styles.inputRow}>
+                  <TextInput
+                    onChangeText={(e) => {
+                      setFormData({ ...formData, phone: e });
+                    }}
+                    value={formData.phone}
+                    inputMode="numeric"
+                    style={{ ...styles.textInput }}
+                    placeholder={langs[language].phonePlaceholder}
+                  />
+                  <SelectDropdown
+                    defaultValue={formData.city}
+                    data={citiesList}
+                    onSelect={(selectedItem, index) => {
+                      setFormData({ ...formData, city: selectedItem });
+                    }}
+                    renderButton={(selectedItem, isOpened) => {
+                      return (
+                        <View style={styles.dropdownButtonStyle}>
+                          <Text
+                            style={
+                              selectedItem != null
+                                ? { color: "#333" }
+                                : styles.dropdownButtonTxtStyle
+                            }
+                          >
+                            {(selectedItem != null && selectedItem) ||
+                              langs[language].cityPlaceholder}
+                          </Text>
+                          <Icon
+                            name={isOpened ? "chevron-up" : "chevron-down"}
+                            style={styles.dropdownButtonArrowStyle}
+                          />
+                        </View>
+                      );
+                    }}
+                    renderItem={(item, index, isSelected) => {
+                      return (
+                        <View
+                          style={{
+                            ...styles.dropdownItemStyle,
+                            ...(isSelected && { backgroundColor: "#E9ECEF" }),
+                          }}
+                        >
+                          <Text style={styles.dropdownItemTxtStyle}>
+                            {item}
+                          </Text>
+                        </View>
+                      );
+                    }}
+                    showsVerticalScrollIndicator={false}
+                    dropdownStyle={styles.dropdownMenuStyle}
+                  />
+                </View>
+                <View style={styles.inputRow}>
+                  <TextInput
+                    onChangeText={(e) => {
+                      setFormData({ ...formData, recipient: e });
+                    }}
+                    value={formData.recipient}
+                    style={styles.textInput}
+                    placeholder={langs[language].namePlaceholder}
+                  />
+                  <TextInput
+                    onChangeText={(e) => {
+                      setFormData({ ...formData, address: e });
+                    }}
+                    value={formData.address}
+                    style={styles.textInput}
+                    placeholder={langs[language].addressPlaceholder}
+                  />
+                </View>
               </View>
-            ) : null}
-            <View style={{...styles.row }}>
-              <Text style={ styles.value }>{ shippingPrice > 0 ? shippingPrice : langs[language].free }</Text>
-              <Text style={ styles.key }>{langs[language].shipping}: </Text>
-            </View>
-            <View style={{...styles.row }}>
-              <Text style={styles.value}>{ points.toFixed(2) }</Text>
-              <Text style={styles.key}>{langs[language].total_points}: </Text>
-            </View>
-            <View style={{...styles.row }}>
-              <Text style={styles.value}>{ products }</Text>
-              <Text style={styles.key}>{langs[language].products_count}: </Text>
+              <View style={styles.holder}>
+                <View style={{ ...styles.row }}>
+                  <Text
+                    style={
+                      discountPrice && discountPrice > 0
+                        ? {
+                            ...styles.value,
+                            textDecorationLine: "line-through",
+                            opacity: 0.55,
+                          }
+                        : { ...styles.value }
+                    }
+                  >
+                    {price.toFixed(2)}
+                  </Text>
+                  <Text style={styles.key}>
+                    {langs[language].total_price}:{" "}
+                  </Text>
+                </View>
+                {discountPrice && discountPrice > 0 ? (
+                  <View style={{ ...styles.row }}>
+                    <Text style={styles.value}>{discountPrice.toFixed(2)}</Text>
+                    <Text style={styles.key}>
+                      {langs[language].after_discount}:{" "}
+                    </Text>
+                  </View>
+                ) : null}
+                <View style={{ ...styles.row }}>
+                  <Text style={styles.value}>
+                    {shippingPrice > 0 ? shippingPrice : langs[language].free}
+                  </Text>
+                  <Text style={styles.key}>{langs[language].shipping}: </Text>
+                </View>
+                <View style={{ ...styles.row }}>
+                  <Text style={styles.value}>{points.toFixed(2)}</Text>
+                  <Text style={styles.key}>
+                    {langs[language].total_points}:{" "}
+                  </Text>
+                </View>
+                <View style={{ ...styles.row }}>
+                  <Text style={styles.value}>{products}</Text>
+                  <Text style={styles.key}>
+                    {langs[language].products_count}:{" "}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
-        </View>
-      </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
   main: {
-    backgroundColor: '#afebf0',
+    backgroundColor: "#afebf0",
   },
   footer: {
     flexDirection: "row",
@@ -410,7 +502,7 @@ const styles = StyleSheet.create({
     textAlignVertical: "center",
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 5
+    gap: 5,
   },
   key: {
     textAlign: "left",
@@ -420,35 +512,35 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 16,
     fontFamily: "zain-black",
-    textAlign: "left"
+    textAlign: "left",
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 0,
   },
   inputRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     gap: 5,
     marginBottom: 2,
   },
   textInput: {
     flex: 1,
     height: "auto",
-    backgroundColor: '#fafafa',
+    backgroundColor: "#fafafa",
     borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 0,
     paddingHorizontal: 12,
   },
   dropdownButtonStyle: {
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
     borderRadius: 4,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     width: "49%",
     paddingVertical: 0,
   },
@@ -456,31 +548,30 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginHorizontal: "auto",
     fontSize: 12,
-    fontWeight: '500',
-    color: '#777',
+    fontWeight: "500",
+    color: "#777",
   },
   dropdownButtonArrowStyle: {
     fontSize: 16,
     paddingRight: 6,
   },
   dropdownMenuStyle: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     // backgroundColor: 'red',
     borderRadius: 8,
   },
   dropdownItemStyle: {
-    width: '100%',
-    flexDirection: 'row',
+    width: "100%",
+    flexDirection: "row",
     paddingHorizontal: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     paddingVertical: 2,
   },
   dropdownItemTxtStyle: {
     flex: 1,
     fontSize: 14,
-    fontWeight: '500',
-    color: '#151E26',
+    fontWeight: "500",
+    color: "#151E26",
   },
 });
-
