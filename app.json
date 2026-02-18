@@ -1,5 +1,5 @@
 {
-  "versionCode": 10,
+  "versionCode": 11,
   "name": "حاسبة DXN التركية",
   "slug": "hasbh-dxn-ballyrh-altrkyh",
   "version": "2.9.0",
@@ -7,7 +7,19 @@
   "icon": "./assets/icon.png",
   "userInterfaceStyle": "light",
   "newArchEnabled": true,
-  "plugins": ["expo-font"],
+  "plugins": [
+    "expo-font",
+    [
+      "expo-build-properties",
+      {
+        "android": {
+          "compileSdkVersion": 35,
+          "targetSdkVersion": 35,
+          "buildToolsVersion": "35.0.0"
+        }
+      }
+    ]
+  ],
   "splash": {
     "image": "./assets/splash.png",
     "resizeMode": "contain",
@@ -27,7 +39,7 @@
     "permissions": [],
     "package": "test.salatemps.hasbhdxnballyrhaltrkyh",
     "runtimeVersion": "2.9.0",
-    "versionCode": "10"
+    "versionCode": "11"
   },
   "web": {
     "favicon": "./assets/favicon.png"

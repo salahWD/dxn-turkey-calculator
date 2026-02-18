@@ -124,9 +124,9 @@ export default function ProductsScreen() {
         IOCLimit +
         " TL) حتى تنتقل لمرحلة الطلب",
       discount_10: "خصم 10%",
-      asp_point_limit_title: "أقل من 100 نقطة !",
+      asp_point_limit_title: "أقل من 300 نقطة !",
       asp_point_limit_desc:
-        "يجب ان تتعدى نقاط الطلبية المائة نقطة في نظام (ASP) كي يتم قبول الطلبية",
+        "يجب ان تتعدى نقاط الطلبية 300 نقطة في نظام (ASP) كي يتم قبول الطلبية",
       alert: "تنبيه",
       discountAlert:
         "يرجى التأكد من تفعيلكم لنظام (ASP) او (DSP ) قبل تقديم طلب خصم 10 بالمية",
@@ -146,9 +146,9 @@ export default function ProductsScreen() {
         IOCLimit +
         " TL) to proceed to the ordering stage.",
       discount_10: "discount 10%",
-      asp_point_limit_title: "Less than 100 points !",
+      asp_point_limit_title: "Less than 300 points !",
       asp_point_limit_desc:
-        "in ASP system, a 100 point at least is required for the order to be accepted !",
+        "in ASP system, a 300 point at least is required for the order to be accepted !",
       alert: "Alert",
       discountAlert:
         "make sure you have Active ASP balance before making an ASP discount order !",
@@ -180,7 +180,7 @@ export default function ProductsScreen() {
             );
           }
         } else if (orderType == 2) {
-          if (footerInfo.points >= 100) {
+          if (footerInfo.points >= 300) {
             setSelectedProducts(selectedProds);
             setPreviewMood(false);
           } else {
@@ -242,9 +242,8 @@ export default function ProductsScreen() {
     });
 
     msg += `%0a *ـ=================*`;
-    msg += `%0a نوع الطلبية: *${
-      ["عادية (SIMP)", "IOC", "ASP", "خصم 10 بالمئة"][orderType]
-    }*`;
+    msg += `%0a نوع الطلبية: *${["عادية (SIMP)", "IOC", "ASP", "خصم 10 بالمئة"][orderType]
+      }*`;
     msg += `%0a *ـ=================*`;
     if (footerInfo.discountPrice > 0) {
       msg += `%0a سعر الطلبية: *~${footerInfo.price}~* TL`;
@@ -252,41 +251,32 @@ export default function ProductsScreen() {
     } else {
       msg += `%0a سعر الطلبية: *${footerInfo.price}* TL`;
     }
-    msg += `%0a سعر الشحن: *${
-      footerInfo.shippingPrice == 0
+    msg += `%0a سعر الشحن: *${footerInfo.shippingPrice == 0
         ? langs[language].free
         : footerInfo.shippingPrice
-    }* TL`;
-    if (footerInfo.discountPrice > 0) {
-      msg += `%0a الإجمالي: *${
-        footerInfo.discountPrice + footerInfo.shippingPrice
-      }* ${footerInfo.shippingPrice == 0 ? "" : " TL"}`;
-    } else {
-      msg += `%0a الإجمالي: *${
-        footerInfo.price + footerInfo.shippingPrice
       }* TL`;
+    if (footerInfo.discountPrice > 0) {
+      msg += `%0a الإجمالي: *${footerInfo.discountPrice + footerInfo.shippingPrice
+        }* ${footerInfo.shippingPrice == 0 ? "" : " TL"}`;
+    } else {
+      msg += `%0a الإجمالي: *${footerInfo.price + footerInfo.shippingPrice
+        }* TL`;
     }
     msg += `%0a إجمالي النقاط: *${footerInfo.points}*`;
     msg += `%0a عدد المنتجات: *${footerInfo.products}*`;
     msg += `%0a *ـ=================*`;
-    msg += `%0a الاسم: ${
-      formData.name?.trim() ? `*${formData.name?.trim()}*` : ""
-    }`;
-    msg += `%0a رقم العضوية: ${
-      formData.membership?.trim() ? `${formData.membership?.trim()}` : ""
-    }`;
-    msg += `%0a اسم المستلم: ${
-      formData.recipient?.trim() ? `*${formData.recipient?.trim()}*` : ""
-    }`;
-    msg += `%0a المدينة: ${
-      formData.city?.trim() ? `*${formData.city?.trim()}*` : ""
-    }`;
-    msg += `%0a العنوان: ${
-      formData.address?.trim() ? `*${formData.address?.trim()}*` : ""
-    }`;
-    msg += `%0a رقم الهاتف: ${
-      formData.phone?.trim() ? `${formData.phone?.trim()}` : ""
-    }`;
+    msg += `%0a الاسم: ${formData.name?.trim() ? `*${formData.name?.trim()}*` : ""
+      }`;
+    msg += `%0a رقم العضوية: ${formData.membership?.trim() ? `${formData.membership?.trim()}` : ""
+      }`;
+    msg += `%0a اسم المستلم: ${formData.recipient?.trim() ? `*${formData.recipient?.trim()}*` : ""
+      }`;
+    msg += `%0a المدينة: ${formData.city?.trim() ? `*${formData.city?.trim()}*` : ""
+      }`;
+    msg += `%0a العنوان: ${formData.address?.trim() ? `*${formData.address?.trim()}*` : ""
+      }`;
+    msg += `%0a رقم الهاتف: ${formData.phone?.trim() ? `${formData.phone?.trim()}` : ""
+      }`;
     msg += `%0a`;
 
     return msg;
