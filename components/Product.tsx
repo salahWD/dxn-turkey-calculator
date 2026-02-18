@@ -1,16 +1,17 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View, Text,StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { productPrice } from '../util/productPrice';
 
 import { LangContext } from "../langContext";
 
 import SelectDropdown from 'react-native-select-dropdown'
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+// import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const productCountList = Array.from(Array(50).keys());
 
 export type ProductProps = {
-  item: {id: number, title: string, img: String, price: number, points: number, special?: number},
+  item: { id: number, title: string, img: String, price: number, points: number, special?: number },
   calcFooter: Function,
   dollarPrice?: number,
   selectedCount?: number,
@@ -19,11 +20,11 @@ export type ProductProps = {
   stopped?: boolean,
 };
 
-export function Product({ item, calcFooter, customStyle, dollarPrice=0, selectedCount=0, disabled=false, stopped=false }: ProductProps) {
-  
+export function Product({ item, calcFooter, customStyle, dollarPrice = 0, selectedCount = 0, disabled = false, stopped = false }: ProductProps) {
+
   const [count, setCount] = useState(0);
   const { language } = useContext(LangContext) || {};
-  
+
   const handleChangedText = (value) => {
     setCount(value);
     calcFooter({ id: item.id, count: value });
@@ -34,17 +35,17 @@ export function Product({ item, calcFooter, customStyle, dollarPrice=0, selected
   }, [selectedCount]);
 
   return (
-    <View style={{ ...styles.product, ...customStyle, backgroundColor: item?.special ? "#c7b2d9" : (stopped ? "#F88379": (count > 0 ? "#98f2a4": "#e1e4eb")), borderWidth: 0.5, borderColor: item?.special ? "#808080": "#cfcfcf" }}>
-      <View style={{ ...styles.cell, borderLeftWidth: 0, flex: 3, borderColor: item?.special ? "#808080": "#cfcfcf" }}>
+    <View style={{ ...styles.product, ...customStyle, backgroundColor: item?.special ? "#c7b2d9" : (stopped ? "#F88379" : (count > 0 ? "#98f2a4" : "#e1e4eb")), borderWidth: 0.5, borderColor: item?.special ? "#808080" : "#cfcfcf" }}>
+      <View style={{ ...styles.cell, borderLeftWidth: 0, flex: 3, borderColor: item?.special ? "#808080" : "#cfcfcf" }}>
         <Text style={styles.text}>{item.title[language]}</Text>
       </View>
-      <View style={{ ...styles.cell, flex: 1, borderColor: item?.special ? "#808080": "#cfcfcf" }}>
+      <View style={{ ...styles.cell, flex: 1, borderColor: item?.special ? "#808080" : "#cfcfcf" }}>
         <Text style={styles.text}>{item.points}</Text>
       </View>
-      <View style={{ ...styles.cell, borderColor: item?.special ? "#808080": "#cfcfcf" }}>
+      <View style={{ ...styles.cell, borderColor: item?.special ? "#808080" : "#cfcfcf" }}>
         <Text style={styles.text}>{productPrice(dollarPrice, item.price).toFixed(1)}</Text>
       </View>
-      <View style={{ ...styles.cell, borderColor: item?.special ? "#808080": "#cfcfcf" }}>
+      <View style={{ ...styles.cell, borderColor: item?.special ? "#808080" : "#cfcfcf" }}>
         <SelectDropdown
           statusBarTranslucent={true}
           defaultValue={selectedCount}
@@ -59,22 +60,22 @@ export function Product({ item, calcFooter, customStyle, dollarPrice=0, selected
                 <Text style={styles.dropdownButtonTxtStyle}>
                   {(selectedItem > 0 && selectedItem) || ' '}
                 </Text>
-                <Icon name={isOpened ? 'chevron-up' : 'chevron-down'} style={styles.dropdownButtonArrowStyle} />
+                <MaterialCommunityIcons name={isOpened ? 'chevron-up' : 'chevron-down'} size={24} color="black" />
               </View>
             );
           }}
           renderItem={(item, index, isSelected) => {
             return (
-              <View style={{...styles.dropdownItemStyle, ...(isSelected && {backgroundColor: '#E9ECEF'})}}>
+              <View style={{ ...styles.dropdownItemStyle, ...(isSelected && { backgroundColor: '#E9ECEF' }) }}>
                 <Text style={styles.dropdownItemTxtStyle}>{item}</Text>
               </View>
             );
           }}
           showsVerticalScrollIndicator={false}
           dropdownStyle={styles.dropdownMenuStyle}
-          />
+        />
       </View>
-      <View style={{ ...styles.cell, paddingRight: 9, borderColor: item?.special ? "#808080": "#cfcfcf" }}>
+      <View style={{ ...styles.cell, paddingRight: 9, borderColor: item?.special ? "#808080" : "#cfcfcf" }}>
         <Text style={styles.text}>{item.points * count}</Text>
       </View>
     </View>
@@ -134,9 +135,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '500',
     color: '#151E26',
-  },
-  dropdownButtonArrowStyle: {
-    fontSize: 16,
   },
   dropdownMenuStyle: {
     backgroundColor: 'white',
